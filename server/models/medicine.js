@@ -8,7 +8,7 @@ const MedicationSchema = new mongoose.Schema({
     frequency: { type: String, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    userId: { type: String, required: true } 
+    // userId: { type: String, required: true } 
 });
 
 module.exports = mongoose.model('Medication', MedicationSchema);

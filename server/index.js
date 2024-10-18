@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 require('dotenv').config();
+const cors = require('cors'); 
 
 const medicationRoutes = require('./routes/medicationRoutes');
 const calendarRoutes = require('./routes/calendarRoutes'); 
@@ -12,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 
 app.use(bodyParser.json());
+app.use(cors());
 
 
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })

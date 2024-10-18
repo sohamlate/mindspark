@@ -9,6 +9,7 @@ router.post('/', async (req, res) => {
 
     try {
         const medication = new Medication({ name, dosage, method, frequency, startDate, endDate });
+        console.log(medication);
         await medication.save();
         res.status(201).json({ message: 'Medication reminder created successfully.', medication });
     } catch (error) {

@@ -1,9 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import UserDashboard from '../src/components/dashboard';
-import PrescriptionDashboard from '../src/components/prescriptiondashboard';
-import PrescriptionPage from './components/prescription';
-import './styles.css'; 
+import UserDashboard from './components/dashboard';
+import PrescriptionDashboard from './components/prescriptiondashboard';
+import PrescriptionPage from './components/prescription';// New import
+import MedicationForm from './components/MedicationForm';
+import MedicationList from './components/MedicationList';
+import './styles.css';
 
 // Mock user data (in a real app, this would come from a database or API)
 const users = [
@@ -16,12 +18,27 @@ const users = [
 ];
 
 const App = () => {
+  const isAuthenticated = false; // Replace with actual authentication logic
+  const authUrl = 'YOUR_GOOGLE_AUTH_URL'; // Replace with actual auth URL
+
+  const handleMedicationAdded = (medication) => {
+    console.log('Medication added:', medication);
+  };
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<UserDashboard users={users} />} />
-        <Route path="/:username" element={<PrescriptionDashboard users={users} />} />
+        <Route path="/:username" element={<PrescriptionDashboard users={users}/>} />
         <Route path="/:username/:prescription" element={<PrescriptionPage users={users} />} />
+        
+        <Route path="/medications" element={
+          <div className="container mx-auto p-4">
+            <h1 className="text-2xl mb-4">Medication Reminder App</h1>
+            <MedicationForm onMedicationAdded={handleMedicationAdded} />
+            <MedicationList />
+          </div>  
+        } />
       </Routes>
     </Router>
   );
