@@ -23,6 +23,10 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 
 app.use('/medications', medicationRoutes);
 app.use('/api/calendar', calendarRoutes);
+const userRoutes = require('./routes/users');
+const priscriptionRoutes = require('./routes/prescriptionRoutes');
+app.use('/api/users', userRoutes);
+app.use('/api/users/:userId', priscriptionRoutes);
 
 
 app.listen(PORT, () => {

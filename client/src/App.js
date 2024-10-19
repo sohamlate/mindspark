@@ -5,6 +5,7 @@ import PrescriptionDashboard from './components/prescriptiondashboard';
 import PrescriptionPage from './components/prescription';// New import
 import MedicationForm from './components/MedicationForm';
 import MedicationList from './components/MedicationList';
+import LandingPage from '../src/components/landingPage';
 import './styles.css';
 
 // Mock user data (in a real app, this would come from a database or API)
@@ -28,9 +29,10 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<UserDashboard users={users} />} />
-        <Route path="/:username" element={<PrescriptionDashboard users={users}/>} />
-        <Route path="/:username/:prescription" element={<PrescriptionPage users={users} />} />
+      <Route path="/" element={<LandingPage users={users} />} />
+        <Route path="/dashboard" element={<UserDashboard users={users} />} />
+        <Route path="/:id" element={<PrescriptionDashboard users={users} />} />
+        <Route path="/:username/:prescriptionTitle" element={<PrescriptionPage users={users} />} />
         
         <Route path="/medications" element={
           <div className="container mx-auto p-4">

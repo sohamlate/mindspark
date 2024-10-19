@@ -1,23 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, PlusCircle, X } from 'lucide-react';
+import { PlusCircle, X, Edit2, Trash2 } from 'lucide-react';
+import axios from 'axios';
 
-const UserDashboard = ({ users }) => {
+const UserDashboard = () => {
+  const [users, setUsers] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', username: '', imageUrl: '' });
+  const [editingUser, setEditingUser] = useState(null);
+  const [newUser, setNewUser] = useState({
+    name: '',
+    breakfastTime: '',
+    lunchTime: '',
+    dinnerTime: ''
+  });
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/users');
+      setUsers(response.data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewUser(prevUser => ({ ...prevUser, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically handle the form submission,
-    // such as sending the data to an API
-    console.log('New user:', newUser);
-    setShowForm(false);
-    setNewUser({ name: '', username: '', imageUrl: '' });
+    try {
+      if (editingUser) {
+        await axios.put(`http://localhost:3001/api/users/${editingUser._id}`, newUser);
+      } else {
+        console.log("newUser", newUser);
+        await axios.post('http://localhost:3001/api/users', newUser);
+      }
+      fetchUsers();
+      setShowForm(false);
+      setEditingUser(null);
+      setNewUser({
+        name: '',
+        breakfastTime: '',
+        lunchTime: '',
+        dinnerTime: ''
+      });
+    } catch (error) {
+      console.error('Error saving user:', error);
+    }
+  };
+
+  const handleEdit = (user) => {
+    setEditingUser(user);
+    setNewUser(user);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (userId) => {
+    try {
+      await axios.delete(`http://localhost:3001/api/users/${userId}`);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
   };
 
   return (
@@ -25,30 +75,44 @@ const UserDashboard = ({ users }) => {
       <h1 className="text-4xl font-bold mb-8 text-center text-yellow-400">Users</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {users.map((user) => (
-          <Link 
-            key={user.id} 
-            to={`/${user.username}`}
-            className="bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105"
-          >
-            <div className="relative">
-              <img
-                src={user.imageUrl}
-                alt={user.name}
-                className="w-full h-48 object-cover"
-              />
-              <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-                <User className="h-24 w-24 text-white opacity-75" />
+          <Link to={`/${user._id}`}>
+          <div key={user._id} className="bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105 relative">
+            <div className="p-4 h-52 flex flex-col justify-between">
+              {/* Edit and Delete buttons positioned in the top right corner */}
+              <div className="absolute top-4 right-4 flex space-x-2">
+                <button
+                  onClick={() => handleEdit(user)}
+                  className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors duration-300"
+                >
+                  <Edit2 size={16} />
+                </button>
+                <button
+                  onClick={() => handleDelete(user._id)}
+                  className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors duration-300"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
+              <div  className='h-full flex justify-center items-center'>
+                <h2 className="text-2xl font-semibold text-yellow-400 text-center">{user.name}</h2>
+             </div>
             </div>
-            <div className="p-4">
-              <h2 className="text-xl font-semibold text-yellow-400 text-center">{user.name}</h2>
-            </div>
-          </Link>
+          </div>
+            </Link>
         ))}
       </div>
       <div className="fixed bottom-8 right-8">
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            setShowForm(!showForm);
+            setEditingUser(null);
+            setNewUser({
+              name: '',
+              breakfastTime: '',
+              lunchTime: '',
+              dinnerTime: ''
+            });
+          }}
           className="bg-yellow-400 text-gray-900 rounded-full p-4 shadow-lg hover:bg-yellow-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50"
         >
           {showForm ? <X className="h-8 w-8" /> : <PlusCircle className="h-8 w-8" />}
@@ -67,17 +131,25 @@ const UserDashboard = ({ users }) => {
             />
             <input
               type="text"
-              name="username"
-              placeholder="Username"
-              value={newUser.username}
+              name="breakfastTime"
+              placeholder="Breakfast Time"
+              value={newUser.breakfastTime}
               onChange={handleInputChange}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
             <input
               type="text"
-              name="imageUrl"
-              placeholder="Image URL"
-              value={newUser.imageUrl}
+              name="lunchTime"
+              placeholder="Lunch Time"
+              value={newUser.lunchTime}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+            />
+            <input
+              type="text"
+              name="dinnerTime"
+              placeholder="Dinner Time"
+              value={newUser.dinnerTime}
               onChange={handleInputChange}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
@@ -85,7 +157,7 @@ const UserDashboard = ({ users }) => {
               type="submit" 
               className="w-full bg-yellow-400 text-gray-900 py-2 rounded-md hover:bg-yellow-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50"
             >
-              Add User
+              {editingUser ? 'Update User' : 'Add User'}
             </button>
           </form>
         </div>
