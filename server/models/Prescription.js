@@ -1,23 +1,22 @@
+// models/Prescription.js
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-const prescriptionSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  imageUrl: {
-    type: String,
-    required: true
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+const Medicine = require('./Medication');
+
+const PrescriptionSchema = new Schema({
+  doctorName: String,
+  doctorLicense: String,
+  patientName: String,
+  patientAge: Number,
+  patientGender: String,
+  diagnosis: String,
+  imageUrl : String,
+  title : String,
+  date: { type: Date, default: Date.now },
+ 
+  userId: { type: Schema.Types.ObjectId, ref: 'User' } // Reference to the User model
 });
 
-module.exports = mongoose.model('Prescription', prescriptionSchema);
+// Export the Prescription model
+module.exports = mongoose.model('Prescription', PrescriptionSchema);

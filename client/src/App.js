@@ -6,43 +6,77 @@ import PrescriptionPage from './components/prescription';// New import
 import MedicationForm from './components/MedicationForm';
 import MedicationList from './components/MedicationList';
 import LandingPage from '../src/components/landingPage';
+import Login from '../src/components/login';
+import Signup from '../src/components/signup';  
 import './styles.css';
+import  { useState , useEffect} from 'react';
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-// Mock user data (in a real app, this would come from a database or API)
-const users = [
-  { id: 1, name: "John Doe", username: "john", imageUrl: "https://via.placeholder.com/150/4A90E2/FFFFFF?text=JD" },
-  { id: 2, name: "Jane Smith", username: "jane", imageUrl: "https://via.placeholder.com/150/50E3C2/FFFFFF?text=JS" },
-  { id: 3, name: "Alice Johnson", username: "alice", imageUrl: "https://via.placeholder.com/150/F5A623/FFFFFF?text=AJ" },
-  { id: 4, name: "Bob Williams", username: "bob", imageUrl: "https://via.placeholder.com/150/D0021B/FFFFFF?text=BW" },
-  { id: 5, name: "Emma Brown", username: "emma", imageUrl: "https://via.placeholder.com/150/7ED321/FFFFFF?text=EB" },
-  { id: 6, name: "Michael Davis", username: "michael", imageUrl: "https://via.placeholder.com/150/9013FE/FFFFFF?text=MD" },
-];
+
+
 
 const App = () => {
-  const isAuthenticated = false; // Replace with actual authentication logic
-  const authUrl = 'YOUR_GOOGLE_AUTH_URL'; // Replace with actual auth URL
+  const navigate = useNavigate();
+  
+  const [user, setUser] = useState({});   
+
+  useEffect(() => { 
+    const autoLogin = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.log("token not");
+          navigate("/login"); 
+        }
+
+        console.log("dchirag", token);
+
+        const response = await axios.post(
+          "http://localhost:3001/api/rootuser/autoLogin",
+          {token}
+        );
+
+        
+        if (response.data.success) {
+          
+         // localStorage.setItem("user", JSON.stringify(response.data.data));
+          setUser(response.data.data, "dsfdsfds");
+        } else {
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Axios request error in app.js:", error);
+      }
+    };
+
+    autoLogin(); 
+  }, []);
+
+  
+  
+
+  
+
 
   const handleMedicationAdded = (medication) => {
     console.log('Medication added:', medication);
   };
 
   return (
-    <Router>
+  
       <Routes>
-      <Route path="/" element={<LandingPage users={users} />} />
-        <Route path="/dashboard" element={<UserDashboard users={users} />} />
-        <Route path="/:id" element={<PrescriptionDashboard users={users} />} />
-        <Route path="/:username/:prescriptionTitle" element={<PrescriptionPage users={users} />} />
+      <Route path="/" element={<LandingPage user ={user } setUser={setUser} />} />
+        <Route path="/dashboard" element={<UserDashboard user={user } />} />
+        <Route path="/:id" element={<PrescriptionDashboard user= {user} />} />
+        <Route path="/:username/:prescriptionTitle" element={<PrescriptionPage users={user} />} />
+        <Route path="/login" element={<Login user={user } setUser = {setUser} />} />
+        <Route path="/signup" element={<Signup user={user} />} />
         
-        <Route path="/medications" element={
-          <div className="container mx-auto p-4">
-            <h1 className="text-2xl mb-4">Medication Reminder App</h1>
-            <MedicationForm onMedicationAdded={handleMedicationAdded} />
-            <MedicationList />
-          </div>  
-        } />
+        <Route path="/:id" element={<PrescriptionDashboard user={user} />} />
+        <Route path="/:userId/prescriptions/:prescriptionId" element={<PrescriptionPage user={user} />} />
       </Routes>
-    </Router>
+    
   );
 };
 

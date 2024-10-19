@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { PlusCircle, X, Edit2, Trash2 } from 'lucide-react';
 import axios from 'axios';
 
-const UserDashboard = () => {
+const UserDashboard = ({user}) => {
   const [users, setUsers] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -16,16 +16,28 @@ const UserDashboard = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [user]);
+
+  console.log(user);
+  const rootUserId = user._id;
+  console.log(rootUserId , "afedsfds");
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/users');
-      setUsers(response.data);
+      // Make a GET request to fetch users by rootUserId
+      console.log(rootUserId, "fdsfdsgdfsfd");
+      const response = await axios.post('http://localhost:3001/api/users', { rootUserId } // Pass rootUserId as a query parameter
+      );
+      console.log(response , "asdasdasd")
+      const usersArray = Array.isArray(response.data.users) 
+      ? response.data.users 
+      : [response.data.users];
+      setUsers(usersArray); 
     } catch (error) {
       console.error('Error fetching users:', error);
     }
   };
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -38,8 +50,9 @@ const UserDashboard = () => {
       if (editingUser) {
         await axios.put(`http://localhost:3001/api/users/${editingUser._id}`, newUser);
       } else {
-        console.log("newUser", newUser);
-        await axios.post('http://localhost:3001/api/users', newUser);
+        console.log("newUser", newUser , rootUserId);
+       
+        await axios.post('http://localhost:3001/api/users/create', {newUser, rootUserId} );
       }
       fetchUsers();
       setShowForm(false);
@@ -70,11 +83,13 @@ const UserDashboard = () => {
     }
   };
 
+ 
+
   return (
     <div className="min-h-screen bg-gray-900 p-8">
       <h1 className="text-4xl font-bold mb-8 text-center text-yellow-400">Users</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {users.map((user) => (
+        {users && users.map((user) => (
           <Link to={`/${user._id}`}>
           <div key={user._id} className="bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105 relative">
             <div className="p-4 h-52 flex flex-col justify-between">

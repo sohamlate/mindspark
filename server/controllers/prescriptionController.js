@@ -5,20 +5,23 @@ const Prescription = require('../models/Prescription');
 exports.createPrescription = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { title, imageUrl } = req.body;
-
-    const user = await User.findOne({ userId });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    const { doctorName, doctorLicense, patientName, patientAge, patientGender, diagnosis, imageUrl, title } = req.body;
 
     const newPrescription = new Prescription({
-      userId: user._id,
-      title,
-      imageUrl,
+      userId: userId,
+      doctorName,
+      doctorLicense,
+      patientName,
+      patientAge,
+      patientGender,
+      diagnosis,
+      imageUrl, title
+     // An array of medicine objects
     });
 
     await newPrescription.save();
+
+    console.log("Presc", newPrescription)
 
     res.status(201).json(newPrescription);
   } catch (error) {
@@ -31,11 +34,11 @@ exports.createPrescription = async (req, res) => {
 exports.editPrescription = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, imageUrl } = req.body;
+    const { doctorName, doctorLicense, patientName, patientAge, patientGender, diagnosis, medicines } = req.body;
 
     const updatedPrescription = await Prescription.findByIdAndUpdate(
       id,
-      { title, imageUrl },
+      { doctorName, doctorLicense, patientName, patientAge, patientGender, diagnosis, medicines },
       { new: true }
     );
 
@@ -71,12 +74,10 @@ exports.deletePrescription = async (req, res) => {
 // Get all prescriptions for a user
 exports.getPrescriptions = async (req, res) => {
   try {
-    // console.log("ddddddd", req.params);
     const { userId } = req.params;
-    // console.log("userId", userId);
-    const prescriptions = await Prescription.find({  });
-    // console.log("prescriptions", prescriptions);
-    res.json(prescriptions);
+
+    const prescriptions = await Prescription.find({ userId: userId });
+    res.json(prescriptions);  
   } catch (error) {
     console.error('Error fetching prescriptions:', error);
     res.status(500).json({ message: 'Error fetching prescriptions' });

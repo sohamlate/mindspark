@@ -3,10 +3,10 @@ const router = express.Router();
 const prescriptionController = require('../controllers/prescriptionController');
 
 // Fetch all prescriptions for a user
-router.get('/', prescriptionController.getPrescriptions);
+router.get('/:userId/prescriptions', prescriptionController.getPrescriptions);
 
 // Create a new prescription
-router.post('/newPrescription', prescriptionController.createPrescription);
+router.post('/:userId/newPrescription', prescriptionController.createPrescription);
 
 // Edit a specific prescription
 router.put('/:id', prescriptionController.editPrescription);

@@ -1,34 +1,72 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight, Pill, ClipboardList, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate(); // Use useNavigate instead of useHistory
+
+  useEffect(() => {
+    // Check if user is logged in (you may want to check a token in localStorage or cookies)
+    const token = localStorage.getItem('token'); // or however you're storing the token
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    // Clear token from localStorage
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    localStorage.removeItem("user");
+    navigate('/'); // Redirect to home or another page
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-yellow-500">
       {/* Navbar */}
       <nav className="flex justify-between items-center p-6">
         <div className="text-3xl font-bold">PrescriptPro</div>
-        <div className="space-x-4">
-          <button className="px-4 py-2 font-medium hover:text-yellow-400 transition-colors duration-300">
-            Features
-          </button>
-          <button className="px-4 py-2 font-medium hover:text-yellow-400 transition-colors duration-300">
-            Pricing
-          </button>
-          <button className="px-4 py-2 font-medium hover:text-yellow-400 transition-colors duration-300">
-            About
-          </button>
-          <Link to="/login">
-            <button className="px-4 py-2 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black transition-colors duration-300 rounded-md font-medium">
-              Login
-            </button>
-          </Link>
-          <Link to="/signup">
-            <button className="px-4 py-2 bg-yellow-500 text-black rounded-md hover:bg-yellow-400 transition-colors duration-300 font-medium">
-              Sign Up
-            </button>
-          </Link>
+        <div className="space-x-4 flex items-center">
+          {isLoggedIn ? (
+            <>
+              {/* Fake User Image */}
+              <img
+                src="https://via.placeholder.com/40" // Replace with a real user image URL or a placeholder
+                alt="User"
+                className="rounded-full"
+              />
+              <button 
+                onClick={handleLogout} 
+                className="px-4 py-2 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black transition-colors duration-300 rounded-md font-medium"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <button className="px-4 py-2 font-medium hover:text-yellow-400 transition-colors duration-300">
+                Features
+              </button>
+              <button className="px-4 py-2 font-medium hover:text-yellow-400 transition-colors duration-300">
+                Pricing
+              </button>
+              <button className="px-4 py-2 font-medium hover:text-yellow-400 transition-colors duration-300">
+                About
+              </button>
+              <Link to="/login">
+                <button className="px-4 py-2 border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-black transition-colors duration-300 rounded-md font-medium">
+                  Login
+                </button>
+              </Link>
+              <Link to="/signup">
+                <button className="px-4 py-2 bg-yellow-500 text-black rounded-md hover:bg-yellow-400 transition-colors duration-300 font-medium">
+                  Sign Up
+                </button>
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 

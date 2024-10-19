@@ -1,51 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Edit2, Save, ArrowLeft, PlusCircle, Trash2 } from 'lucide-react';
+import axios from 'axios';
 
 const PrescriptionPage = () => {
-  const { username, prescriptionTitle } = useParams();
-
+  const { userId, prescriptionId } = useParams();
   const [isEditing, setIsEditing] = useState(false);
+  const [prescriptionmed, setPrescriptionmed] = useState([]);
   const [prescription, setPrescription] = useState({
-    doctorName: "Dr. John Doe",
-    doctorLicense: "MD12345",
-    patientName: "Jane Smith",
-    patientAge: "35",
-    patientGender: "Female",
-    diagnosis: "Common Cold",
-    date: "2024-10-18",
-    medicines: [
-      { id: 1, name: "Acetaminophen", dosage: "500mg", frequency: "Every 6 hours", duration: "5 days" },
-      { id: 2, name: "Loratadine", dosage: "10mg", frequency: "Once daily", duration: "7 days" }
-    ]
+    doctorName: "Mr. Prajwal",
+    doctorLicense: "Maharashtra Medical Council",
+    patientName: "Pratik patil",
+    patientAge: 24,
+    patientGender: "Male",
+    diagnosis: "Fever",
+    date: "21-10-2024",
+    medicines: [{ name: "", dosage: { morning: 0, afternoon: 0, evening: 0, night: 0 }, timing: "", duration: "" }]
   });
+
+  useEffect(() => {
+    fetchPrescription();
+  }, [prescriptionId]);
+
+  const fetchPrescription = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/users/p/${userId}/prescriptions`);
+      const response2 = await axios.get(`http://localhost:3001/api/medicines/${response.data.filter(prescription => prescription._id == prescriptionId)[0]._id}`);
+      console.log("gggggggggggg",response.data.filter(prescription => prescription._id == prescriptionId)[0]);
+      setPrescriptionmed(response2.data)
+      console.log('Prescriptions:', response.data.filter(prescription => prescription._id == prescriptionId)[0]._id);
+       setPrescription(response.data.filter(prescription => prescription._id == prescriptionId)[0]);
+    } catch (error) {
+      console.error('Error fetching prescription:', error);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setPrescription(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleMedicineChange = (id, field, value) => {
+  const handleMedicineChange = (index, field, value) => {
     setPrescription(prev => ({
       ...prev,
-      medicines: prev.medicines.map(med => 
-        med.id === id ? { ...med, [field]: value } : med
+      medicines: prev.medicines.map((med, i) => 
+        i === index ? { ...med, [field]: value } : med
+      )
+    }));
+  };
+
+  const handleDosageChange = (index, time, value) => {
+    setPrescription(prev => ({
+      ...prev,
+      medicines: prev.medicines.map((med, i) => 
+        i === index ? { 
+          ...med, 
+          dosage: { ...med.dosage, [time]: parseFloat(value) }
+        } : med
       )
     }));
   };
 
   const addMedicine = () => {
-    const newMedicine = { id: Date.now(), name: "", dosage: "", frequency: "", duration: "" };
+    const newMedicine = { 
+      name: "", 
+      dosage: { morning: 0, afternoon: 0, evening: 0, night: 0 },
+      timing: "",
+      duration: ""
+    };
     setPrescription(prev => ({
       ...prev,
       medicines: [...prev.medicines, newMedicine]
     }));
   };
 
-  const deleteMedicine = (id) => {
+  const deleteMedicine = (index) => {
     setPrescription(prev => ({
       ...prev,
-      medicines: prev.medicines.filter(med => med.id !== id)
+      medicines: prev.medicines.filter((_, i) => i !== index)
     }));
   };
 
@@ -53,21 +85,25 @@ const PrescriptionPage = () => {
     setIsEditing(!isEditing);
   };
 
-  const handleSave = () => {
-    console.log("Saving prescription:", prescription);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      await axios.put(`http://localhost:3001/api/prescriptions/${prescriptionId}`, prescription);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error saving prescription:', error);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <Link to={`/${username}`} className="text-black flex items-center mb-4 hover:text-black">
-        <ArrowLeft className="mr-2" /> Back to {username}'s Profile
+      <Link to={`/${userId}`} className="text-black flex items-center mb-4 hover:text-black">
+        <ArrowLeft className="mr-2" /> Back to User's Profile
       </Link>
       <div className="max-w-4xl mx-auto">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="px-4 py-5 sm:p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Prescription: {prescriptionTitle}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Prescription Details</h2>
               <button
                 onClick={isEditing ? handleSave : toggleEdit}
                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -86,61 +122,90 @@ const PrescriptionPage = () => {
               </button>
             </div>
             
-            {/* Common Details */}
+            {/* Prescription Details */}
             <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8 mb-8">
-              {Object.entries(prescription)
-                .filter(([key]) => key !== 'medicines')
-                .map(([key, value]) => (
-                  <div key={key}>
-                    <label htmlFor={key} className="block text-sm font-medium text-gray-700">
-                      {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim()}
-                    </label>
-                    <input
-                      type="text"
-                      name={key}
-                      id={key}
-                      value={value}
-                      onChange={handleInputChange}
-                      readOnly={!isEditing}
-                      className={`mt-1 block w-full rounded-md shadow-sm 
-                      ${isEditing 
-                        ? 'focus:ring-indigo-500 focus:border-indigo-500 border-gray-300' 
-                        : 'bg-gray-100 border-transparent'
-                      } sm:text-sm`}
-                    />
-                  </div>
+              {['doctorName', 'doctorLicense', 'patientName', 'patientAge', 'patientGender', 'diagnosis'].map((field) => (
+                <div key={field}>
+                  <label htmlFor={field} className="block text-sm font-medium text-gray-700">
+                    {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1').trim()}
+                  </label>
+                  <input
+                    type={field === 'date' ? 'date' : 'text'}
+                    name={field}
+                    id={field}
+                    value={prescription[field] || '-'}
+                    onChange={handleInputChange}
+                    readOnly={!isEditing}
+                    className={`mt-1 block w-full rounded-md shadow-sm 
+                    ${isEditing 
+                      ? 'focus:ring-indigo-500 focus:border-indigo-500 border-gray-300' 
+                      : 'bg-gray-100 border-transparent'
+                    } sm:text-sm`}
+                  />
+                </div>
               ))}
             </div>
             
             {/* Medicines */}
             <h3 className="text-lg font-medium text-gray-900 mb-4">Medicines</h3>
             <div className="space-y-4">
-              {prescription.medicines.map((medicine) => (
-                <div key={medicine.id} className="bg-gray-50 p-4 rounded-md">
+              {prescriptionmed.map((medicine, index) => (
+                <div key={index} className="bg-gray-50 p-4 rounded-md">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-2">
+                    <div>
+                      <label htmlFor={`medicine-name-${index}`} className="block text-sm font-medium text-gray-700">Name</label>
+                      <input
+                        type="text"
+                        id={`medicine-name-${index}`}
+                        value={medicine.name}
+                        onChange={(e) => handleMedicineChange(index, 'name', e.target.value)}
+                        readOnly={!isEditing}
+                        className={`mt-1 block w-full rounded-md shadow-sm ${isEditing ? 'border-gray-300' : 'bg-gray-100 border-transparent'} sm:text-sm`}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor={`medicine-timing-${index}`} className="block text-sm font-medium text-gray-700">Timing</label>
+                      <input
+                        type="text"
+                        id={`medicine-timing-${index}`}
+                        value={medicine.timing}
+                        onChange={(e) => handleMedicineChange(index, 'timing', e.target.value)}
+                        readOnly={!isEditing}
+                        className={`mt-1 block w-full rounded-md shadow-sm ${isEditing ? 'border-gray-300' : 'bg-gray-100 border-transparent'} sm:text-sm`}
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor={`medicine-duration-${index}`} className="block text-sm font-medium text-gray-700">Duration (days)</label>
+                      <input
+                        type="text"
+                        id={`medicine-duration-${index}`}
+                        value={medicine.duration}
+                        onChange={(e) => handleMedicineChange(index, 'duration', e.target.value)}
+                        readOnly={!isEditing}
+                        className={`mt-1 block w-full rounded-md shadow-sm ${isEditing ? 'border-gray-300' : 'bg-gray-100 border-transparent'} sm:text-sm`}
+                      />
+                    </div>
+                  </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {['name', 'dosage', 'frequency', 'duration'].map((field) => (
-                      <div key={field}>
-                        <label htmlFor={`${medicine.id}-${field}`} className="block text-sm font-medium text-gray-700">
-                          {field.charAt(0).toUpperCase() + field.slice(1)}
-                        </label>
+                    {['morning', 'afternoon', 'evening', 'night'].map((time) => (
+                      <div key={time}>
+                        <label htmlFor={`medicine-${time}-${index}`} className="block text-sm font-medium text-gray-700">{time.charAt(0).toUpperCase() + time.slice(1)}</label>
                         <input
-                          type="text"
-                          id={`${medicine.id}-${field}`}
-                          value={medicine[field]}
-                          onChange={(e) => handleMedicineChange(medicine.id, field, e.target.value)}
+                          type="number"
+                          id={`medicine-${time}-${index}`}
+                          value={medicine.dosage[time]}
+                          onChange={(e) => handleDosageChange(index, time, e.target.value)}
                           readOnly={!isEditing}
-                          className={`mt-1 block w-full rounded-md shadow-sm 
-                          ${isEditing 
-                            ? 'focus:ring-indigo-500 focus:border-indigo-500 border-gray-300' 
-                            : 'bg-gray-100 border-transparent'
-                          } sm:text-sm`}
+                          step="0.5"
+                          min="0"
+                          className={`mt-1 block w-full rounded-md shadow-sm ${isEditing ? 'border-gray-300' : 'bg-gray-100 border-transparent'} sm:text-sm`}
                         />
                       </div>
                     ))}
                   </div>
                   {isEditing && (
                     <button
-                      onClick={() => deleteMedicine(medicine.id)}
+                      onClick={() => deleteMedicine(index)}
                       className="mt-2 inline-flex items-center px-2 py-1 border border-transparent text-xs leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                     >
                       <Trash2 className="h-4 w-4 mr-1" />

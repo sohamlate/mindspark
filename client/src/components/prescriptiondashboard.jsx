@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Pencil, Trash2, PlusCircle, ArrowLeft, User, X, Save } from 'lucide-react';
 import axios from 'axios';
+import { storage } from '../firebaseConfig'; // Import Firebase storage
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 
 const PrescriptionDashboard = () => {
   const userId = useParams().id;
@@ -9,6 +11,7 @@ const PrescriptionDashboard = () => {
   const [prescriptions, setPrescriptions] = useState([]);
   const [editMode, setEditMode] = useState(null);
   const [newPrescription, setNewPrescription] = useState({ title: '', imageUrl: '' });
+  const [file, setFile] = useState(null); // New state to hold the image file
   const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,8 +23,8 @@ const PrescriptionDashboard = () => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/users/${userId}`);
-      setUser(response.data);
+      // const response = await axios.get(`http://localhost:3001/api/users/${userId}`);
+      setUser({name : "u1"});
     } catch (error) {
       setError('Error fetching user');
       console.error('Error fetching user:', error);
@@ -32,7 +35,8 @@ const PrescriptionDashboard = () => {
 
   const fetchPrescriptions = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/users/${userId}`);
+      const response = await axios.get(`http://localhost:3001/api/users/p/${userId}/prescriptions`);
+      console.log('Prescriptions:', response.data);
       setPrescriptions(response.data);
     } catch (error) {
       console.error('Error fetching prescriptions:', error);
@@ -44,25 +48,64 @@ const PrescriptionDashboard = () => {
     setNewPrescription((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleEditChange = (e, id, field) => {
-    setPrescriptions((prevPrescriptions) =>
-      prevPrescriptions.map((prescription) =>
-        prescription.id === id ? { ...prescription, [field]: e.target.value } : prescription
-      )
-    );
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]); // Set the selected file
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post(`http://localhost:3001/api/users/${userId}/newPrescription`, newPrescription);
-      setPrescriptions((prev) => [...prev, response.data]);
-      setNewPrescription({ title: '', imageUrl: '' });
-      setShowAddForm(false);
-    } catch (error) {
-      console.log('Error adding prescription:', error);
+
+    if (!file) {
+        console.log('Please select a file');
+        return;
     }
-  };
+
+    const storageRef = ref(storage, `prescriptions/${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+            // Progress can be tracked here if needed
+        },
+        (error) => {
+            console.error('Error uploading image:', error);
+        },
+        async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            try {
+              const medications = await axios.post('http://localhost:3001/api/extractimg/fetchimage', { imageUrl : downloadURL });
+              
+                const response = await axios.post(`http://localhost:3001/api/users/p/${userId}/newPrescription`, {
+                    title: newPrescription.title,
+                    imageUrl: downloadURL, 
+                    ...medications.data.data// Use the Firebase URL here
+                });
+
+                console.log('New prescription added:',{
+                  title: newPrescription.title,
+                  imageUrl: downloadURL, 
+                  ...medications.data.data// Use the Firebase URL here
+            });
+
+                // Now send the medications data to the backend
+                console.log('xxxxxxxxxxxxxx', medications  );
+                const medicationResponse = await axios.post(`http://localhost:3001/api/medicines/${response.data._id}`, 
+                    medications.data.data ,
+                    userId
+                );
+
+                // console.log('New medications added:', medicationResponse.data);
+                setPrescriptions((prev) => [...prev, response.data]);
+                setNewPrescription({ title: '', imageUrl: '' });
+                setFile(null); // Clear the file input after submission
+                setShowAddForm(false);
+            } catch (error) {
+                console.error('Error adding prescription or medications:', error);
+            }
+        }
+    );
+};
 
   const handleDelete = async (id) => {
     try {
@@ -95,6 +138,16 @@ const PrescriptionDashboard = () => {
     );
   }
 
+  const handleEditChange = (e, id, field) => {
+    const { value } = e.target;
+    setPrescriptions((prevPrescriptions) =>
+      prevPrescriptions.map((prescription) =>
+        prescription.id === id ? { ...prescription, [field]: value } : prescription
+      )
+    );
+  };
+
+  
   if (error) {
     return (
       <div className="min-h-screen bg-gray-900 p-8 text-red-400 text-center">
@@ -133,6 +186,7 @@ const PrescriptionDashboard = () => {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {prescriptions.map((prescription) => (
+          <Link to={`/${userId}/prescriptions/${prescription._id}`} key={prescription.id}>
           <div key={prescription.id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
             <div className="p-4">
               <div className="flex justify-between items-center mb-2">
@@ -177,54 +231,39 @@ const PrescriptionDashboard = () => {
               />
             </div>
           </div>
+           </Link>
         ))}
       </div>
       <button
         onClick={() => setShowAddForm(!showAddForm)}
-        className="fixed bottom-8 right-8 bg-yellow-400 text-gray-900 rounded-full p-4 shadow-lg hover:bg-yellow-300 transition-colors duration-300"
+        className="fixed bottom-8 right-8 bg-yellow-400 text-gray-900 rounded-full p-4 shadow-lg hover:bg-yellow-300 focus:outline-none"
       >
-        {showAddForm ? <X className="h-6 w-6" /> : <PlusCircle className="h-6 w-6" />}
+        {showAddForm ? <X className="h-8 w-8" /> : <PlusCircle className="h-8 w-8" />}
       </button>
       {showAddForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-gray-800 p-6 rounded-lg w-96">
-            <h2 className="text-2xl font-bold text-yellow-400 mb-4">Add New Prescription</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                name="title"
-                placeholder="Title"
-                value={newPrescription.title}
-                onChange={handleInputChange}
-                className="w-full p-2 bg-gray-700 text-yellow-400 rounded"
-                required
-              />
-              <input
-                type="text"
-                name="imageUrl"
-                placeholder="Image URL"
-                value={newPrescription.imageUrl}
-                onChange={handleInputChange}
-                className="w-full p-2 bg-gray-700 text-yellow-400 rounded"
-                required
-              />
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddForm(false)}
-                  className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-500"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-yellow-400 text-gray-900 rounded hover:bg-yellow-300"
-                >
-                  Add Prescription
-                </button>
-              </div>
-            </form>
-          </div>
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-800 p-8 shadow-lg">
+          <h3 className="text-xl text-yellow-400 mb-4">Add New Prescription</h3>
+          <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+            <input
+              type="text"
+              name="title"
+              value={newPrescription.title}
+              onChange={handleInputChange}
+              placeholder="Prescription Title"
+              className="bg-gray-700 text-yellow-400 px-4 py-2 rounded"
+            />
+            <input
+              type="file"
+              onChange={handleFileChange}
+              className="bg-gray-700 text-yellow-400 px-4 py-2 rounded"
+            />
+            <button
+              type="submit"
+              className="bg-yellow-400 text-gray-900 px-4 py-2 rounded hover:bg-yellow-300"
+            >
+              Save Prescription
+            </button>
+          </form>
         </div>
       )}
     </div>
