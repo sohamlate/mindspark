@@ -20,7 +20,10 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-
+const userRoutes = require('./routes/users');
+const priscriptionRoutes = require('./routes/prescriptionRoutes');
+app.use('/api/users', userRoutes);
+app.use('/api/users/:userId', priscriptionRoutes);
 app.use('/medications', medicationRoutes);
 app.use('/api/calendar', calendarRoutes);
 
