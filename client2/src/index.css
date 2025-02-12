@@ -1,0 +1,23 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Custom slick dots styling */
+.slick-dots li button:before {
+  color: white !important;  /* Dots should be white */
+  opacity: 1 !important;     /* Make dots fully visible */
+}
+
+.slick-dots li.slick-active button:before {
+  color: yellow !important;  /* Active dot color */
+}
