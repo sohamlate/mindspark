@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const Login = ( {setUser , user} ) => {
+const Login = ({ setUser, user }) => {
   const [gmail, setGmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -53,6 +53,15 @@ const Login = ( {setUser , user} ) => {
         <button type="submit" className="w-full bg-yellow-500 text-black py-2 rounded hover:bg-yellow-400">
           Login
         </button>
+        <p className="text-center mt-4">
+          Don't have an account? 
+          <span 
+            className="text-blue-400 cursor-pointer hover:underline ml-1"
+            onClick={() => navigate('/signup')}
+          >
+            Sign Up
+          </span>
+        </p>
       </form>
     </div>
   );
