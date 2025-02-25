@@ -67,6 +67,7 @@ exports.editPrescription = async (req, res) => {
 exports.deletePrescription = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(id)
 
     const deletedPrescription = await Prescription.findByIdAndDelete(id);
 

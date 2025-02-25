@@ -4,6 +4,8 @@ const RootUser = require('../models/rootuser'); // Import RootUser model
 
 exports.getUsers = async (req, res) => {
   try {
+
+    // console.log("req: ", req );
    
     const rootUserId = req.body.rootUserId; 
     const users = await User.find({ rootUser: rootUserId }).populate('rootUser');
@@ -13,6 +15,18 @@ exports.getUsers = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getSingleUser = async(req, res) => {
+  try {
+    const userId = req.body.userId; 
+    const users = await User.findById(userId);
+
+    return res.status(200).json({  users });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
 
 

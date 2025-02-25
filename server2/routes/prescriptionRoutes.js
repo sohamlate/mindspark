@@ -9,6 +9,6 @@ router.post('/:userId/newPrescription', prescriptionController.createPrescriptio
 
 router.put('/:id', prescriptionController.editPrescription);
 
-router.delete('/:id', prescriptionController.deletePrescription);
+router.delete('/:userId/prescriptions/:id', prescriptionController.deletePrescription);
 
 module.exports = router;

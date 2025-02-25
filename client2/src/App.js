@@ -32,7 +32,7 @@ const App = () => {
           navigate("/login"); 
         }
 
-        console.log("dchirag", token);
+        // console.log("dchirag", token);
 
         const response = await axios.post(
           "http://localhost:3001/api/rootuser/autoLogin",
@@ -40,7 +40,7 @@ const App = () => {
         );
 
         
-        console.log(response);
+        // console.log(response);
         if (response.data.success) {
          // localStorage.setItem("user", JSON.stringify(response.data.data));
           setUser(response.data.data, "dsfdsfds");

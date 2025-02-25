@@ -8,9 +8,13 @@ const Medication = require('../models/Medication');
 
 require('dotenv').config();
 
-AWS.config.update({ region: 'ap-south-1' });
 
-const textract = new AWS.Textract();
+
+const textract = new AWS.Textract({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
 
 const model = new ChatGroq({
   apiKey: process.env.GROQ_API_KEY,

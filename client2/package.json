@@ -25,6 +25,7 @@
     "react-scripts": "^5.0.1",
     "react-slick": "^0.30.3",
     "react-typed": "^2.0.12",
+    "recharts": "^2.15.1",
     "slick-carousel": "^1.8.1",
     "web-vitals": "^2.1.4"
   },

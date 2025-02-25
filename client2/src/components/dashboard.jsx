@@ -1,10 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { PlusCircle, X, Edit2, Trash2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { 
+  PlusCircle, 
+  X, 
+  Edit2, 
+  Trash2,
+  Users,
+  Clock,
+  Bell,
+  Calendar,
+  Activity,
+  CheckCircle,
+  AlertCircle,
+  Pill
+} from 'lucide-react';
 import axios from 'axios';
-// import { motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 const UserDashboard = ({ user }) => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -15,6 +29,14 @@ const UserDashboard = ({ user }) => {
     dinnerTime: '00:00',
     sleepTime: '00:00',
   });
+
+  // Mock statistics for demonstration
+  const stats = [
+    { icon: <CheckCircle className="w-6 h-6" />, label: "Doses Taken", value: "95%" },
+    { icon: <AlertCircle className="w-6 h-6" />, label: "Missed Doses", value: "5%" },
+    { icon: <Activity className="w-6 h-6" />, label: "Adherence Rate", value: "92%" },
+    { icon: <Pill className="w-6 h-6" />, label: "Active Medications", value: "8" },
+  ];
 
   useEffect(() => {
     fetchUsers();
@@ -79,16 +101,23 @@ const UserDashboard = ({ user }) => {
     }
   };
 
-  const handleEdit = (user, e) => {
-    
+  const handleEdit = (userObj, e) => {
     e.stopPropagation();
-    setEditingUser(user);
+    setEditingUser(userObj);
     setNewUser({
-      name: user.name,
-      breakfastTime: new Date(user.breakfastTime).toISOString().substring(11, 16),
-      lunchTime: new Date(user.lunchTime).toISOString().substring(11, 16),
-      dinnerTime: new Date(user.dinnerTime).toISOString().substring(11, 16),
-      sleepTime: new Date(user.sleepTime).toISOString().substring(11, 16),
+      name: userObj.name,
+      breakfastTime: new Date(userObj.breakfastTime)
+        .toISOString()
+        .substring(11, 16),
+      lunchTime: new Date(userObj.lunchTime)
+        .toISOString()
+        .substring(11, 16),
+      dinnerTime: new Date(userObj.dinnerTime)
+        .toISOString()
+        .substring(11, 16),
+      sleepTime: new Date(userObj.sleepTime)
+        .toISOString()
+        .substring(11, 16),
     });
     setShowForm(true);
   };
@@ -104,41 +133,110 @@ const UserDashboard = ({ user }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 p-8">
+    <div className="min-h-screen bg-slate-900 p-8">
+      {/* Welcome Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="text-center mb-12"
+      >
+        <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+          Welcome to Your Dashboard
+        </h1>
+        <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+          Manage your family's medication schedules and track their health progress all in one place.
+        </p>
+      </motion.div>
 
-    
-
-
-      <h1 className="text-4xl font-bold mb-8 text-center text-yellow-400">Users</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {users.map((user) => (
-          <Link to={`/${user._id}`} key={user._id}>
-            <div className="bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105 relative">
-              <div className="p-4 h-52 flex flex-col justify-between">
-                <div className="absolute top-4 right-4 flex space-x-2">
-                  <button
-                    onClick={(e) => handleEdit(user, e)}
-                    className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition-colors duration-300"
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                  <button
-                    onClick={(e) => handleDelete(user._id, e)}
-                    className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors duration-300"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-                <div className="h-full flex justify-center items-center">
-                  <h2 className="text-2xl font-semibold text-yellow-400 text-center">{user.name}</h2>
-                </div>
+      {/* Statistics Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+      >
+        {stats.map((stat, index) => (
+          <motion.div
+            key={index}
+            whileHover={{ scale: 1.05 }}
+            className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-xl border border-slate-700/50 hover:border-emerald-500/50 transition-all duration-300"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-emerald-500/10 rounded-lg text-emerald-400">
+                {stat.icon}
+              </div>
+              <div>
+                <p className="text-slate-400 text-sm">{stat.label}</p>
+                <p className="text-2xl font-semibold text-emerald-400">{stat.value}</p>
               </div>
             </div>
-          </Link>
+          </motion.div>
         ))}
-      </div>
-      <div className="fixed bottom-8 right-8">
-        <button
+      </motion.div>
+
+      {/* Users Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
+      >
+        <h2 className="text-3xl font-bold mb-8 text-center text-emerald-400">Manage Family Members</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {users.map((user, index) => (
+            <motion.div
+              key={user._id}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              onClick={() => navigate(`/${user._id}`)}
+              className="bg-slate-800/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 hover:scale-105 relative border border-slate-700/50 hover:border-emerald-500/50"
+            >
+              <div className="p-6 h-52 flex flex-col justify-between">
+                <div className="absolute top-4 right-4 flex space-x-2">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => handleEdit(user, e)}
+                    className="bg-emerald-500/20 text-emerald-400 p-2 rounded-full hover:bg-emerald-500/30 transition-colors duration-300"
+                  >
+                    <Edit2 size={16} />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => handleDelete(user._id, e)}
+                    className="bg-red-500/20 text-red-400 p-2 rounded-full hover:bg-red-500/30 transition-colors duration-300"
+                  >
+                    <Trash2 size={16} />
+                  </motion.button>
+                </div>
+                <div className="h-full flex flex-col justify-center items-center gap-4">
+                  <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center">
+                    <Users className="w-8 h-8 text-emerald-400" />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-emerald-400 text-center">{user.name}</h2>
+                  <div className="flex gap-2 text-slate-400 text-sm">
+                    <Clock className="w-4 h-4" />
+                    <span>{new Date(user.breakfastTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Add User Button */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+        className="fixed bottom-8 right-8"
+      >
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => {
             setShowForm(!showForm);
             setEditingUser(null);
@@ -150,13 +248,19 @@ const UserDashboard = ({ user }) => {
               sleepTime: '',
             });
           }}
-          className="bg-yellow-400 text-gray-900 rounded-full p-4 shadow-lg hover:bg-yellow-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50"
+          className="bg-emerald-500 text-white rounded-full p-4 shadow-lg hover:bg-emerald-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50"
         >
           {showForm ? <X className="h-8 w-8" /> : <PlusCircle className="h-8 w-8" />}
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
+
+      {/* Add/Edit User Form */}
       {showForm && (
-        <div className="fixed bottom-20 right-8 w-64 bg-gray-800 text-white rounded-lg shadow-lg p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed bottom-20 right-8 w-80 bg-slate-800/95 backdrop-blur-sm text-white rounded-lg shadow-lg p-6 border border-slate-700/50"
+        >
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               type="text"
@@ -164,60 +268,30 @@ const UserDashboard = ({ user }) => {
               placeholder="Name"
               value={newUser.name}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full px-4 py-2 bg-slate-900/50 text-white rounded-lg border border-slate-700/50 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-colors duration-300"
             />
-            <div className="space-y-2">
-              <label className="text-sm text-yellow-400">Breakfast Time (HH:MM)</label>
-              <input
-                type="time"
-                name="breakfastTime"
-                placeholder="Breakfast Time"
-                value={newUser.breakfastTime}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-yellow-400">Lunch Time (HH:MM)</label>
-              <input
-                type="time"
-                name="lunchTime"
-                placeholder="Lunch Time"
-                value={newUser.lunchTime}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-yellow-400">Dinner Time (HH:MM)</label>
-              <input
-                type="time"
-                name="dinnerTime"
-                placeholder="Dinner Time"
-                value={newUser.dinnerTime}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm text-yellow-400">Sleep Time (HH:MM)</label>
-              <input
-                type="time"
-                name="sleepTime"
-                placeholder="Sleep Time"
-                value={newUser.sleepTime}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
-              />
-            </div>
-            <button
+            {['breakfast', 'lunch', 'dinner', 'sleep'].map((meal) => (
+              <div key={meal} className="space-y-2">
+                <label className="text-sm text-emerald-400 capitalize">{meal} Time (HH:MM)</label>
+                <input
+                  type="time"
+                  name={`${meal}Time`}
+                  value={newUser[`${meal}Time`]}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 bg-slate-900/50 text-white rounded-lg border border-slate-700/50 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-colors duration-300"
+                />
+              </div>
+            ))}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
-              className="w-full bg-yellow-400 text-gray-900 py-2 rounded-md hover:bg-yellow-300 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50"
+              className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50"
             >
               {editingUser ? 'Update User' : 'Add User'}
-            </button>
+            </motion.button>
           </form>
-        </div>
+        </motion.div>
       )}
     </div>
   );

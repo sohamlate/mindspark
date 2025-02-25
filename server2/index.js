@@ -28,7 +28,7 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 
 // app.use('/api/calendar', calendarRoutes);
 app.use('/api/users', rootuser);
-app.use('/api/users/:userId', priscriptionRoutes);
+app.use('/api/users', priscriptionRoutes);
 app.use('/api/rootuser', authRoutes);
 app.use('/api/users/p', priscriptionRoutes);
 app.use('/api/extractimg', llmRoutes);
