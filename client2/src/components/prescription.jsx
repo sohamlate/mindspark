@@ -267,8 +267,8 @@ console.log(hours , "sdad dsad");
 
   const fetchPrescription = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/users/p/${userId}/prescriptions`);
-      const response2 = await axios.get(`http://localhost:3001/api/medicines/${prescriptionId}`);
+      const response = await axios.get(`https://prescriptprob.vercel.app/api/users/p/${userId}/prescriptions`);
+      const response2 = await axios.get(`https://prescriptprob.vercel.app/api/medicines/${prescriptionId}`);
       console.log(response2.data,"guruji");
       setPrescriptionmed(response2.data);
       setPrescription(response.data.filter(prescription => prescription._id == prescriptionId)[0]);
@@ -321,8 +321,8 @@ const handleDosageChange = (index, time, value) => {
       
       const handleSave = async () => {
         try {
-          await axios.put(`http://localhost:3001/api/users/p/${prescriptionId}`, prescription);
-          await axios.put(`http://localhost:3001/api/medicines/${prescriptionId}`, { medicines: prescriptionmed });
+          await axios.put(`https://prescriptprob.vercel.app/api/users/p/${prescriptionId}`, prescription);
+          await axios.put(`https://prescriptprob.vercel.app/api/medicines/${prescriptionId}`, { medicines: prescriptionmed });
           setIsEditing(false);
         } catch (error) {
           console.error('Error saving prescription:', error);
@@ -331,7 +331,7 @@ const handleDosageChange = (index, time, value) => {
       
       const generateScedule = async () => {
         try {
-          const response = await axios.post(`http://localhost:3001/api/event/generateScedule`, { userId, prescriptionId });
+          const response = await axios.post(`https://prescriptprob.vercel.app/api/event/generateScedule`, { userId, prescriptionId });
           const events = response.data.eventDocument.events;
           console.log(events , "priting events")
 

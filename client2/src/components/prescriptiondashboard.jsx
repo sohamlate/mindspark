@@ -42,7 +42,7 @@ const PrescriptionDashboard = () => {
   const fetchUser = async () => {
     try {
       const response = await axios.post(
-        `http://localhost:3001/api/users/getUser`,
+        `https://prescriptprob.vercel.app/api/users/getUser`,
         { userId }
       );
       setUser({ name: response.data.users.name, imageUrl: response.data.users.imageUrl });
@@ -63,7 +63,7 @@ const PrescriptionDashboard = () => {
 
   const fetchPrescriptions = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/users/p/${userId}/prescriptions`);
+      const response = await axios.get(`https://prescriptprob.vercel.app/api/users/p/${userId}/prescriptions`);
       setPrescriptions(response.data);
     } catch (error) {
       console.error('Error fetching prescriptions:', error);
@@ -104,12 +104,12 @@ const PrescriptionDashboard = () => {
           try {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
             const medications = await axios.post(
-              'http://localhost:3001/api/extractimg/fetchimage',
+              'https://prescriptprob.vercel.app/api/extractimg/fetchimage',
               { imageUrl: downloadURL }
             );
 
             const response = await axios.post(
-              `http://localhost:3001/api/users/p/${userId}/newPrescription`,
+              `https://prescriptprob.vercel.app/api/users/p/${userId}/newPrescription`,
               {
                 title: newPrescription.title,
                 imageUrl: downloadURL,
@@ -143,7 +143,7 @@ const PrescriptionDashboard = () => {
     if (window.confirm('Are you sure you want to delete this prescription?')) {
       try {
         setLoading(true);
-        await axios.delete(`http://localhost:3001/api/users/${userId}/prescriptions/${_id}`);
+        await axios.delete(`https://prescriptprob.vercel.app/api/users/${userId}/prescriptions/${_id}`);
         setPrescriptions((prev) => prev.filter((prescription) => prescription._id !== _id));
       } catch (error) {
         console.error('Error deleting prescription:', error);
@@ -173,7 +173,7 @@ const PrescriptionDashboard = () => {
     try {
       setLoading(true);
       await axios.put(
-        `http://localhost:3001/api/users/${userId}/prescriptions/${_id}`,
+        `https://prescriptprob.vercel.app/api/users/${userId}/prescriptions/${_id}`,
         { title: editTitle }
       );
       

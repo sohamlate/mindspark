@@ -6,7 +6,7 @@ const MedicationList = () => {
 
     const fetchMedications = async () => {
         try {
-            const response = await fetch('http://localhost:3001/medications');
+            const response = await fetch('https://prescriptprob.vercel.app/medications');
             if (response.ok) {
                 const data = await response.json();
                 setMedications(data);

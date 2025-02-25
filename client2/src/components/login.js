@@ -12,7 +12,7 @@ const Login = ( {setUser , user} ) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/api/rootuser/login', { gmail, phone, password });
+      const response = await axios.post('https://prescriptprob.vercel.app/api/rootuser/login', { gmail, phone, password });
       localStorage.setItem('token', response.data.token);
       setUser(response.data.user);
       navigate('/dashboard'); 

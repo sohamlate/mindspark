@@ -35,7 +35,7 @@ const App = () => {
         // console.log("dchirag", token);
 
         const response = await axios.post(
-          "http://localhost:3001/api/rootuser/autoLogin",
+          "https://prescriptprob.vercel.app/api/rootuser/autoLogin",
           {token}
         );
 
