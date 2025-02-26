@@ -45,7 +45,7 @@ export const PrescriptionPage = () => {
   // console.log(document.policy);
 
 
-  // Add new stats section data
+  // Add new stats section data jj
   const stats = [
     { 
       icon: <Clock className="w-6 h-6" />, 
