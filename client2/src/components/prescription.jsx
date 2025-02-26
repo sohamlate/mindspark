@@ -37,6 +37,10 @@ export const PrescriptionPage = () => {
     diagnosis: "Fever",
     date: "21-10-2024",
   });
+  const [authState, setAuthState] = useState({
+    accessToken: localStorage.getItem("access_token"),
+    expiresIn: localStorage.getItem("expires_in"),
+  });
 
   // console.log(document.policy);
 
@@ -96,6 +100,10 @@ export const PrescriptionPage = () => {
     gapiLoaded();
     gisLoaded();
   }, []);
+
+  useEffect(() => {
+    console.log("Auth state changed:", authState);
+  }, [authState]);
   
   function gapiLoaded() {
     gapi.load("client", initializeGapiClient);
@@ -172,6 +180,7 @@ export const PrescriptionPage = () => {
         const { access_token, expires_in } = tokenData;
         localStorage.setItem("access_token", access_token);
         localStorage.setItem("expires_in", expires_in);
+        setAuthState({ accessToken: access_token, expiresIn: expires_in });
       }
       
       console.log("ram ram"); // Check if it gets here
@@ -183,7 +192,7 @@ export const PrescriptionPage = () => {
     } else {
       tokenClient.requestAccessToken({ prompt: "" });
     }
-    window.location.reload();
+    // window.location.reload();
   }
   
   function handleSignoutClick() {
@@ -193,8 +202,10 @@ export const PrescriptionPage = () => {
       gapi.client.setToken("");
       localStorage.removeItem("access_token");
       localStorage.removeItem("expires_in");
-      window.location.reload();
+
+      setAuthState({ accessToken: null, expiresIn: null });
     }
+    // window.location.reload();
   }
   
   async function listUpcomingEvents() {
@@ -210,8 +221,7 @@ export const PrescriptionPage = () => {
       };
       response = await gapi.client.calendar.events.list(request);
     } catch (err) {
-      console.log(err.message);
-      // document.getElementById("content").innerText = err.message;
+      document.getElementById("content").innerText = err.message;
       return;
     }
     
@@ -230,12 +240,9 @@ export const PrescriptionPage = () => {
   } 
   
   function addManualEvent(eventData , index) {
-    console.log("priting access ", eventData.summary, " " , eventData.start.dateTime);
-    const eventDate = new Date(eventData.start.dateTime);
-const hours = eventDate.getHours();
-console.log(hours , "sdad dsad");
+    console.log("priting access ", accessToken , expiresIn);
     var event = {
-      summary: `Prescription for ${eventData.summary} -  ${prescription.patientName} - Event ${index + 1}`,
+      summary: `Prescription for ${prescription.patientName} - Event ${index + 1}`,
       location: 'Doctor’s Office',
       description: eventData.description || prescription.diagnosis,
       start: {
@@ -267,6 +274,7 @@ console.log(hours , "sdad dsad");
       }
     );
   }
+
 
   const fetchPrescription = async () => {
     try {
