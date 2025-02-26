@@ -38,6 +38,9 @@ export const PrescriptionPage = () => {
     date: "21-10-2024",
   });
 
+  console.log(document.policy);
+
+
   // Add new stats section data
   const stats = [
     { 
