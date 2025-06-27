@@ -96,15 +96,7 @@ const LandingPage = () => {
                 </>
               ) : (
                 <>
-                  <button className="px-4 py-2 font-medium text-slate-300 hover:text-emerald-400 transition-colors duration-300">
-                    Features
-                  </button>
-                  <button className="px-4 py-2 font-medium text-slate-300 hover:text-emerald-400 transition-colors duration-300">
-                    Pricing
-                  </button>
-                  <button className="px-4 py-2 font-medium text-slate-300 hover:text-emerald-400 transition-colors duration-300">
-                    About
-                  </button>
+               
                   <Link to="/login">
                     <button className="px-4 py-2 border border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-colors duration-300 rounded-md font-medium">
                       Login
@@ -173,9 +165,7 @@ const LandingPage = () => {
                   <ArrowRight className="ml-2" />
                 </button>
               </Link>
-              <button className="px-6 py-3 border border-emerald-500/50 text-emerald-400 rounded-md hover:bg-emerald-500/10 transition-colors duration-300 font-medium backdrop-blur-sm">
-                WhatsApp Bot
-              </button>
+          
             </motion.div>
 
             {/* Dosage Management Section */}

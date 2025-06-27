@@ -12,8 +12,10 @@ const rootUserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-    }
-});
+    },
+    otp: { type: String },
+    otpExpires: { type: Date }
+}); 
 
 const RootUser = mongoose.model('RootUser', rootUserSchema);
 

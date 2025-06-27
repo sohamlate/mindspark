@@ -1,25 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
-  PlusCircle, 
-  X, 
-  Edit2, 
-  Trash2,
-  Users,
-  Clock,
-  Bell,
-  Calendar,
-  Activity,
-  CheckCircle,
-  AlertCircle,
-  Pill
+  PlusCircle, X, Edit2, Trash2, Users, Clock, 
+  FileText, CalendarCheck, UserCheck, BarChart3 
 } from 'lucide-react';
 import axios from 'axios';
-import { motion } from "framer-motion";
+import { motion } from 'framer-motion';
 
 const UserDashboard = ({ user }) => {
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [dashboardStats, setDashboardStats] = useState({
+    prescriptionCount: 0,
+    medicationCount: 0,
+    eventTodayCount: 0,
+    familyMemberCount: 0
+  });
+
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [newUser, setNewUser] = useState({
@@ -30,23 +27,17 @@ const UserDashboard = ({ user }) => {
     sleepTime: '00:00',
   });
 
-  // Mock statistics for demonstration
-  const stats = [
-    { icon: <CheckCircle className="w-6 h-6" />, label: "Doses Taken", value: "95%" },
-    { icon: <AlertCircle className="w-6 h-6" />, label: "Missed Doses", value: "5%" },
-    { icon: <Activity className="w-6 h-6" />, label: "Adherence Rate", value: "92%" },
-    { icon: <Pill className="w-6 h-6" />, label: "Active Medications", value: "8" },
-  ];
+  const rootUserId = user._id;
 
   useEffect(() => {
+    if (!rootUserId) return;
     fetchUsers();
+    fetchStats();
   }, [user]);
-
-  const rootUserId = user._id;
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.post('https://prescriptprob.vercel.app/api/users', {
+      const response = await axios.post('http://localhost:3001/api/users', {
         rootUserId,
       });
       const usersArray = Array.isArray(response.data.users)
@@ -55,6 +46,17 @@ const UserDashboard = ({ user }) => {
       setUsers(usersArray);
     } catch (error) {
       console.error('Error fetching users:', error);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const response = await axios.post('http://localhost:3001/api/dashboard/stats', {
+        rootUserId,
+      });
+      setDashboardStats(response.data);
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
     }
   };
 
@@ -75,12 +77,9 @@ const UserDashboard = ({ user }) => {
       };
 
       if (editingUser) {
-        await axios.put(
-          `https://prescriptprob.vercel.app/api/users/${editingUser._id}`,
-          formattedUser
-        );
+        await axios.put(`http://localhost:3001/api/users/${editingUser._id}`, formattedUser);
       } else {
-        await axios.post('https://prescriptprob.vercel.app/api/users/create', {
+        await axios.post('http://localhost:3001/api/users/create', {
           ...formattedUser,
           rootUserId,
         });
@@ -106,18 +105,10 @@ const UserDashboard = ({ user }) => {
     setEditingUser(userObj);
     setNewUser({
       name: userObj.name,
-      breakfastTime: new Date(userObj.breakfastTime)
-        .toISOString()
-        .substring(11, 16),
-      lunchTime: new Date(userObj.lunchTime)
-        .toISOString()
-        .substring(11, 16),
-      dinnerTime: new Date(userObj.dinnerTime)
-        .toISOString()
-        .substring(11, 16),
-      sleepTime: new Date(userObj.sleepTime)
-        .toISOString()
-        .substring(11, 16),
+      breakfastTime: new Date(userObj.breakfastTime).toISOString().substring(11, 16),
+      lunchTime: new Date(userObj.lunchTime).toISOString().substring(11, 16),
+      dinnerTime: new Date(userObj.dinnerTime).toISOString().substring(11, 16),
+      sleepTime: new Date(userObj.sleepTime).toISOString().substring(11, 16),
     });
     setShowForm(true);
   };
@@ -125,7 +116,7 @@ const UserDashboard = ({ user }) => {
   const handleDelete = async (userId, e) => {
     e.stopPropagation();
     try {
-      await axios.delete(`https://prescriptprob.vercel.app/api/users/${userId}`);
+      await axios.delete(`http://localhost:3001/api/users/${userId}`);
       fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -134,7 +125,6 @@ const UserDashboard = ({ user }) => {
 
   return (
     <div className="min-h-screen bg-slate-900 p-8">
-      {/* Welcome Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -149,14 +139,19 @@ const UserDashboard = ({ user }) => {
         </p>
       </motion.div>
 
-      {/* Statistics Section */}
+      {/* Real Stats Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
       >
-        {stats.map((stat, index) => (
+        {[
+          { icon: <UserCheck className="w-6 h-6" />, label: "Family Members", value: dashboardStats.familyMemberCount },
+          { icon: <FileText className="w-6 h-6" />, label: "Prescriptions", value: dashboardStats.prescriptionCount },
+          { icon: <BarChart3 className="w-6 h-6" />, label: "Medications", value: dashboardStats.medicationCount },
+          { icon: <CalendarCheck className="w-6 h-6" />, label: "Today's Events", value: dashboardStats.eventTodayCount },
+        ].map((stat, index) => (
           <motion.div
             key={index}
             whileHover={{ scale: 1.05 }}
@@ -176,11 +171,7 @@ const UserDashboard = ({ user }) => {
       </motion.div>
 
       {/* Users Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
         <h2 className="text-3xl font-bold mb-8 text-center text-emerald-400">Manage Family Members</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {users.map((user, index) => (
@@ -228,25 +219,14 @@ const UserDashboard = ({ user }) => {
       </motion.div>
 
       {/* Add User Button */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5, delay: 0.6 }}
-        className="fixed bottom-8 right-8"
-      >
+      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.6 }} className="fixed bottom-8 right-8">
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => {
             setShowForm(!showForm);
             setEditingUser(null);
-            setNewUser({
-              name: '',
-              breakfastTime: '',
-              lunchTime: '',
-              dinnerTime: '',
-              sleepTime: '',
-            });
+            setNewUser({ name: '', breakfastTime: '', lunchTime: '', dinnerTime: '', sleepTime: '' });
           }}
           className="bg-emerald-500 text-white rounded-full p-4 shadow-lg hover:bg-emerald-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50"
         >
@@ -256,38 +236,16 @@ const UserDashboard = ({ user }) => {
 
       {/* Add/Edit User Form */}
       {showForm && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="fixed bottom-20 right-8 w-80 bg-slate-800/95 backdrop-blur-sm text-white rounded-lg shadow-lg p-6 border border-slate-700/50"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="fixed bottom-20 right-8 w-80 bg-slate-800/95 backdrop-blur-sm text-white rounded-lg shadow-lg p-6 border border-slate-700/50">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={newUser.name}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 bg-slate-900/50 text-white rounded-lg border border-slate-700/50 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-colors duration-300"
-            />
+            <input type="text" name="name" placeholder="Name" value={newUser.name} onChange={handleInputChange} className="w-full px-4 py-2 bg-slate-900/50 text-white rounded-lg border border-slate-700/50 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-colors duration-300" />
             {['breakfast', 'lunch', 'dinner', 'sleep'].map((meal) => (
               <div key={meal} className="space-y-2">
                 <label className="text-sm text-emerald-400 capitalize">{meal} Time (HH:MM)</label>
-                <input
-                  type="time"
-                  name={`${meal}Time`}
-                  value={newUser[`${meal}Time`]}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 bg-slate-900/50 text-white rounded-lg border border-slate-700/50 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-colors duration-300"
-                />
+                <input type="time" name={`${meal}Time`} value={newUser[`${meal}Time`]} onChange={handleInputChange} className="w-full px-4 py-2 bg-slate-900/50 text-white rounded-lg border border-slate-700/50 focus:border-emerald-500/50 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-colors duration-300" />
               </div>
             ))}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50"
-            >
+            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-opacity-50">
               {editingUser ? 'Update User' : 'Add User'}
             </motion.button>
           </form>

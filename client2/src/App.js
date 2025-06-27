@@ -10,8 +10,10 @@ import Login from '../src/components/login';
 import Signup from '../src/components/signup';  
 import './styles.css';
 import  { useState , useEffect} from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation  } from "react-router-dom";
 import axios from "axios";
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 
  
@@ -19,60 +21,63 @@ import axios from "axios";
 
 const App = () => {
   const navigate = useNavigate();
+  const routerLocation = useLocation();
+
   
   const [user, setUser] = useState({});   
   
 
   useEffect(() => { 
-    const autoLogin = async () => {
+       const autoLogin = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) {
-          console.log("token not");
-          navigate("/login"); 
-        }
 
-        // console.log("dchirag", token);
+        if (!token) {
+          if (isProtectedRoute(routerLocation.pathname)) {
+            console.log("Token missing, redirecting to login");
+            navigate("/login");
+          }
+          return;
+        }
 
         const response = await axios.post(
-          "https://prescriptprob.vercel.app/api/rootuser/autoLogin",
-          {token}
+          "http://localhost:3001/api/rootuser/autoLogin",
+          { token }
         );
 
-        
-        // console.log(response);
         if (response.data.success) {
-         // localStorage.setItem("user", JSON.stringify(response.data.data));
-          setUser(response.data.data, "dsfdsfds");
+          setUser(response.data.data);
         } else {
-          navigate("/login");
+          if (isProtectedRoute(routerLocation.pathname)) {
+            navigate("/login");
+          }
         }
       } catch (error) {
-        navigate("/login");
-        console.error("Axios request error in app.js:", error);
+        if (isProtectedRoute(routerLocation.pathname)) {
+          navigate("/login");
+        }
+        console.error("Auto-login failed:", error.message);
       }
     };
 
-    autoLogin(); 
-  }, []);
+    autoLogin();
+  }, [routerLocation.pathname]); // runs when route changes
 
-
-
-  
-  
-
-  
-
-
-  const handleMedicationAdded = (medication) => {
-    console.log('Medication added:', medication);
+  const isProtectedRoute = (path) => {
+    const publicRoutes = [
+      "/login",
+      "/signup",
+      "/forgot-password",
+    ];
+    return !publicRoutes.includes(path) && !path.startsWith("/reset-password");
   };
+
+
 
   return (
 
     <div>
-     
-       
+        
 
       <Routes>
       <Route path="/" element={<LandingPage user ={user } setUser={setUser} />} />
@@ -83,6 +88,8 @@ const App = () => {
         <Route path="/signup" element={<Signup user={user} />} />
         
         <Route path="/:id" element={<PrescriptionDashboard user={user} />} />
+         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/:userId/prescriptions/:prescriptionId" element={<PrescriptionPage user={user} />} />
       </Routes>
 
