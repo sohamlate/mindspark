@@ -6,19 +6,74 @@ const nodemailer = require('nodemailer');
 
 dotenv.config();
 
-// Signup Controller
-exports.signup = async (req, res) => {
-    const { gmail, phone, password } = req.body;
+const crypto = require("crypto");
 
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new RootUser({ gmail, phone, password: hashedPassword });
-        await newUser.save();
-        res.status(201).json({ message: 'User created successfully!' });
-    } catch (error) {
-        res.status(500).json({ error: 'User registration failed.' });
-    }
+exports.requestOtp = async (req, res) => {
+  const { gmail, phone } = req.body;
+
+  try {
+    // Check if user already exists
+    const existingUser = await RootUser.findOne({ gmail });
+    if (existingUser) return res.status(400).json({ message: "User already exists" });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Save OTP temp record (no password yet)
+    let user = await RootUser.findOneAndUpdate(
+      { gmail },
+      { gmail, phone, otp, otpExpires },
+      { upsert: true, new: true }
+    );
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: gmail,
+      subject: 'Signup OTP Verification',
+      html: `<p>Your OTP is <b>${otp}</b>. It will expire in 10 minutes.</p>`
+    });
+
+    res.status(200).json({ message: 'OTP sent to email.' });
+  } catch (error) {
+    console.error("Request OTP Error:", error.message);
+    res.status(500).json({ message: 'Failed to send OTP.' });
+  }
 };
+
+
+// Signup Controller
+exports.verifyOtpAndSignup = async (req, res) => {
+  const { gmail, phone, password, otp } = req.body;
+
+  try {
+    const user = await RootUser.findOne({ gmail });
+    if (!user) return res.status(404).json({ message: "No OTP request found." });
+
+    if (user.otp !== otp || user.otpExpires < Date.now()) {
+      return res.status(400).json({ message: "Invalid or expired OTP." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+
+    res.status(201).json({ message: 'User created successfully!' });
+  } catch (error) {
+    console.error("Verify OTP Error:", error.message);
+    res.status(500).json({ message: 'Failed to verify OTP.' });
+  }
+};
+
 
 // Login Controller
 exports.login = async (req, res) => {

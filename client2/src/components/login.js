@@ -25,17 +25,17 @@ const Login = ({ setUser }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-yellow-500 flex items-center justify-center">
-      <form onSubmit={handleLogin} className="bg-gray-800 p-6 rounded-md w-full max-w-md">
-        <h1 className="text-3xl font-bold mb-4">Login</h1>
-        {error && <p className="text-red-500 mb-2">{error}</p>}
+    <div className="min-h-screen bg-slate-900 text-emerald-400 flex items-center justify-center">
+      <form onSubmit={handleLogin} className="bg-slate-800 p-8 rounded-lg w-full max-w-md border border-slate-700/50 shadow-lg">
+        <h1 className="text-3xl font-bold mb-6 text-center">Login</h1>
+        {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
         <input
           type="email"
           placeholder="Gmail"
           value={gmail}
           onChange={(e) => setGmail(e.target.value)}
           required
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-3 mb-4 rounded-lg bg-slate-900/50 border border-slate-700/50 focus:outline-none focus:ring focus:ring-emerald-500"
         />
         <input
           type="password"
@@ -43,23 +43,26 @@ const Login = ({ setUser }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-3 mb-4 rounded-lg bg-slate-900/50 border border-slate-700/50 focus:outline-none focus:ring focus:ring-emerald-500"
         />
-        <button type="submit" className="w-full bg-yellow-500 text-black py-2 rounded hover:bg-yellow-400">
+        <button
+          type="submit"
+          className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600 transition duration-300"
+        >
           Login
         </button>
         <div className="text-center mt-4">
           <span
-            className="text-blue-400 cursor-pointer hover:underline"
+            className="text-emerald-300 cursor-pointer hover:underline"
             onClick={() => navigate('/forgot-password')}
           >
             Forgot Password?
           </span>
         </div>
-        <p className="text-center mt-4">
-          Don't have an account?
+        <p className="text-center mt-4 text-slate-400">
+          Don’t have an account?
           <span
-            className="text-blue-400 cursor-pointer hover:underline ml-1"
+            className="text-emerald-300 cursor-pointer hover:underline ml-1"
             onClick={() => navigate('/signup')}
           >
             Sign Up

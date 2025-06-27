@@ -1,4 +1,3 @@
-// src/pages/ForgotPassword.js
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -18,21 +17,32 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-yellow flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="bg-gray-800 p-6 rounded-md w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">Forgot Password</h2>
+    <div className="min-h-screen bg-slate-900 text-emerald-400 flex items-center justify-center">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-slate-800 p-8 rounded-lg w-full max-w-md border border-slate-700/50 shadow-lg"
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center">Forgot Password</h2>
+
         <input
           type="email"
-          placeholder="Enter your email"
+          placeholder="Enter your Gmail"
           value={gmail}
           onChange={(e) => setGmail(e.target.value)}
           required
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-3 mb-4 rounded-lg bg-slate-900/50 border border-slate-700/50 focus:outline-none focus:ring focus:ring-emerald-500"
         />
-        <button type="submit" className="w-full bg-yellow-500 text-black py-2 rounded hover:bg-yellow-400">
+
+        <button
+          type="submit"
+          className="w-full bg-emerald-500 text-white py-3 rounded-lg hover:bg-emerald-600 transition duration-300"
+        >
           Send Reset Link
         </button>
-        {message && <p className="mt-4 text-center">{message}</p>}
+
+        {message && (
+          <p className="mt-4 text-center text-sm text-slate-300">{message}</p>
+        )}
       </form>
     </div>
   );
