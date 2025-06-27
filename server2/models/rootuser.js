@@ -13,7 +13,7 @@ const rootUserSchema = new mongoose.Schema({
         type: String,
         required: true,
     }
-});
+}); 
 
 const RootUser = mongoose.model('RootUser', rootUserSchema);
 

@@ -12,7 +12,7 @@ const Signup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('https://prescriptprob.vercel.app/api/rootuser/signup', { gmail, phone, password });
+      await axios.post('http://localhost:3001/api/rootuser/signup', { gmail, phone, password });
       navigate('/login'); // Redirect to login page after successful signup
     } catch (err) {
       setError('Signup failed. Please try again.');
