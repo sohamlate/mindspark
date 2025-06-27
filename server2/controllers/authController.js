@@ -8,7 +8,7 @@ dotenv.config();
 // Signup Controller
 exports.signup = async (req, res) => {
     const { gmail, phone, password } = req.body;
-
+  
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new RootUser({ gmail, phone, password: hashedPassword });
@@ -18,7 +18,7 @@ exports.signup = async (req, res) => {
         res.status(500).json({ error: 'User registration failed.' });
     }
 };
-
+ 
 // Login Controller
 exports.login = async (req, res) => {
     const { gmail, password } = req.body;
