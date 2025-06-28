@@ -1,5 +1,6 @@
 const User = require('../models/User'); 
 const Prescription = require('../models/Prescription');
+const Medication = require('../models/Medication');
 
 // Create a new prescription
 exports.createPrescription = async (req, res) => {
@@ -94,3 +95,53 @@ exports.getPrescriptions = async (req, res) => {
     res.status(500).json({ message: 'Error fetching prescriptions' });
   }
 };
+
+
+
+exports.getPrescriptionStatuses = async (req, res) => {
+    try {
+      console.log('getPrescriptionStatuses called with params:', req.params);
+        const userId = req.params.userId;
+
+        // Fetch prescriptions for the user
+        const prescriptions = await Prescription.find({ userId }).select('_id date');
+        console.log('Fetched prescriptions:', prescriptions);
+        const prescriptionIds = prescriptions.map(p => p._id.toString());
+
+        // Fetch all medications under these prescriptions
+        const medications = await Medication.find({ prescriptionId: { $in: prescriptionIds } }).select('prescriptionId duration');
+
+        const now = new Date();
+
+        const statuses = prescriptions.map(prescription => {
+            const startDate = new Date(prescription.date);
+            const meds = medications.filter(m => m.prescriptionId === prescription._id.toString());
+
+            if (meds.length === 0) {
+                // No medications, consider as passive
+                return { _id: prescription._id.toString(), isActive: false };
+            }
+
+            // Compute latest end date based on medication durations
+            const medEndDates = meds.map(med => {
+                const durationDays = parseInt(med.duration) || 0;
+                const endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + durationDays);
+                return endDate;
+            });
+
+            const latestEndDate = new Date(Math.max(...medEndDates));
+            const isActive = now <= latestEndDate;
+
+            return { _id: prescription._id.toString(), isActive };
+        });
+
+        console.log('Prescription statuses:', statuses);
+
+        res.status(200).json({ statuses });
+    } catch (error) {
+        console.error('Error in getPrescriptionStatuses:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+

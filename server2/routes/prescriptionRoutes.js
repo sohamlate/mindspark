@@ -11,4 +11,6 @@ router.put('/:id', prescriptionController.editPrescription);
 
 router.delete('/:userId/prescriptions/:id', prescriptionController.deletePrescription);
 
+router.get('/:userId/prescriptionStatus', prescriptionController.getPrescriptionStatuses);
+
 module.exports = router;

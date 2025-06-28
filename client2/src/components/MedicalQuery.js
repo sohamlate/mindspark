@@ -9,24 +9,31 @@ const MedicalQuery = () => {
   const [response, setResponse] = useState('');
   const typedRef = useRef(null);
   const [showTyping, setShowTyping] = useState(false);
+  const [displayedResponse, setDisplayedResponse] = useState('');
 
 
 
-  useEffect(() => {
-    if (showTyping && response && typedRef.current) {
-      const typed = new Typed(typedRef.current, {
-        strings: [response],
-        typeSpeed: 20,
-        showCursor: true,
-        cursorChar: '|',
-        onComplete: () => setShowTyping(false)
-      });
 
-      return () => {
-        typed.destroy();
-      };
-    }
-  }, [response, showTyping]);
+useEffect(() => {
+  if (showTyping && response && typedRef.current) {
+    const typed = new Typed(typedRef.current, {
+      strings: [response],
+      typeSpeed: 20,
+      showCursor: true,
+      cursorChar: '|',
+      onComplete: () => {
+        setShowTyping(false);
+        setDisplayedResponse(response);
+      }
+    });
+
+    return () => {
+      typed.destroy();
+    };
+  }
+}, [response, showTyping]);
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -113,7 +120,12 @@ const MedicalQuery = () => {
                   </div>
                 ) : (
                   <div className="text-slate-300 leading-relaxed">
-                    <span ref={typedRef}></span>
+                    {showTyping ? (
+                      <span ref={typedRef}></span>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{displayedResponse}</p>
+                    )}
+
                   </div>
                 )}
               </div>

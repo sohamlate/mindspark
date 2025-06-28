@@ -28,6 +28,8 @@ export const PrescriptionPage = () => {
   const { userId, prescriptionId } = useParams();
   const [isEditing, setIsEditing] = useState(false);
   const [prescriptionmed, setPrescriptionmed] = useState([]);
+  const [isActive, setIsActive] = useState(true);
+
   const [prescription, setPrescription] = useState({
     doctorName: "Mr. Prajwal",
     doctorLicense: "Maharashtra Medical Council",
@@ -42,39 +44,56 @@ export const PrescriptionPage = () => {
     expiresIn: localStorage.getItem("expires_in"),
   });
 
-  // console.log(document.policy);
+  useEffect(() => {
+  if (prescriptionmed.length > 0 && prescription.date) {
+    const startDate = new Date(prescription.date);
+    const endDates = prescriptionmed.map(med => {
+      const duration = parseInt(med.duration) || 0;
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + duration);
+      return endDate;
+    });
+
+    const latestEndDate = new Date(Math.max(...endDates));
+    const now = new Date();
+
+    setIsActive(now <= latestEndDate);
+  }
+}, [prescriptionmed, prescription.date]);
+
 
 
   // Add new stats section data jj
-  const stats = [
-    { 
-      icon: <Clock className="w-6 h-6" />, 
-      label: "Duration", 
-      value: prescriptionmed[0]?.duration || "N/A" 
-    },
-    { 
-      icon: <Pill className="w-6 h-6" />, 
-      label: "Medicines", 
-      value: prescriptionmed.length 
-    },
-    { 
-      icon: <Activity className="w-6 h-6" />, 
-      label: "Daily Doses", 
-      value: prescriptionmed.reduce((acc, med) => 
-        acc + Object.values(med.dosage).reduce((sum, dose) => sum + (dose || 0), 0), 0
-      )
-    },
-    { 
-      icon: <CalendarClock className="w-6 h-6" />, 
-      label: "Next Dose", 
-      value: "2 hours" 
-    }
-  ];
+ const stats = [
+  { 
+    icon: <Clock className="w-6 h-6" />, 
+    label: "Duration", 
+    value: prescriptionmed[0]?.duration || "N/A" 
+  },
+  { 
+    icon: <Pill className="w-6 h-6" />, 
+    label: "Medicines", 
+    value: prescriptionmed.length 
+  },
+  { 
+    icon: <Activity className="w-6 h-6" />, 
+    label: "Daily Doses", 
+    value: prescriptionmed.reduce((acc, med) => 
+      acc + Object.values(med.dosage).reduce((sum, dose) => sum + (dose || 0), 0), 0
+    )
+  },
+  { 
+    icon: <CalendarClock className="w-6 h-6" />, 
+    label: "Next Dose", 
+    value: isActive ? "2 hours" : "Completed ✅"
+  }
+];
+
 
   const gapi = window.gapi;
   const google = window.google;
 
-  // console.log("rrs ", process.env.REACT_APP_SS);
+  // console.log("rrs ", process.env.REACT_APP_CLIENT_ID);
 
   const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
   const API_KEY = process.env.REACT_APP_API_KEY;
@@ -371,7 +390,7 @@ const handleDosageChange = (index, time, value) => {
               to={`/${userId}`} 
               className="text-emerald-400 flex items-center mb-8 hover:text-emerald-300 transition-colors duration-300"
             >
-              <ArrowLeft className="mr-2" /> Back to User's Profile
+              <ArrowLeft className="mr-2" /> Back to All Priscriptions
             </Link>
           </motion.div>
     

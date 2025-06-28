@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import Typed from "typed.js";
 import { Pill, Bell, Shield, Clock } from "lucide-react";
 
-const Intro = () => {
+const Intro = ({ onClick }) => {
+
   const [animationFinished, setAnimationFinished] = useState(false);
   const [animationFinished2, setAnimationFinished2] = useState(true);
   const [animationFinished3, setAnimationFinished3] = useState(true);
@@ -49,6 +50,7 @@ const Intro = () => {
 
   return (
     <div
+      onClick={onClick}
       className={`fixed z-50 left-0 top-0 w-screen h-screen bg-slate-900 transition-opacity duration-1000 flex justify-center items-center ${
         animationFinished ? "opacity-0" : "opacity-100"
       } ${animationFinished3 ? "" : "hidden"}`}
