@@ -59,9 +59,13 @@ const LandingPage = () => {
     }
   }, []);
 
-  setTimeout(() => {
+  useEffect(() => {
+  const timer = setTimeout(() => {
     setIntroEnded(false);
   }, 9000);
+  return () => clearTimeout(timer);
+}, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -70,9 +74,16 @@ const LandingPage = () => {
     navigate('/');
   };
 
+  const bottomRef = React.useRef(null);
+
+  const handleChatWithBotClick = () => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+
   return (
     <div className="min-h-screen bg-slate-900 text-white overflow-x-hidden">
-      {isIntroEnded && <Intro />}
+      {isIntroEnded && <Intro onClick={() => setIntroEnded(false)} />}
 
       {!isIntroEnded && (
         <div className="relative">
@@ -154,19 +165,27 @@ const LandingPage = () => {
 
             {/* Call-to-Action Buttons */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex justify-center space-x-4 mb-20"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="flex justify-center space-x-4 mb-20"
+          >
+            <Link to="/dashboard">
+              <button className="px-6 py-3 flex items-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-md hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 font-medium shadow-lg hover:shadow-emerald-500/25">
+                <span>Get Started</span>
+                <ArrowRight className="ml-2" />
+              </button>
+            </Link>
+
+            <button
+              onClick={handleChatWithBotClick}
+              className="px-6 py-3 flex items-center bg-slate-700 text-white rounded-md hover:bg-slate-600 transition-all duration-300 font-medium shadow-lg hover:shadow-emerald-500/25"
             >
-              <Link to="/dashboard">
-                <button className="px-6 py-3 flex items-center bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-md hover:from-emerald-600 hover:to-teal-600 transition-all duration-300 font-medium shadow-lg hover:shadow-emerald-500/25">
-                  <span>Get Started</span>
-                  <ArrowRight className="ml-2" />
-                </button>
-              </Link>
-          
-            </motion.div>
+              <span>Chat with Bot</span>
+              <ArrowRight className="ml-2" />
+            </button>
+          </motion.div>
+
 
             {/* Dosage Management Section */}
             <section className="mb-20">
@@ -206,7 +225,7 @@ const LandingPage = () => {
             </section>
 
             {/* Safety Features Section */}
-            <section className="mb-20">
+            <section className="mb-20" >
               <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8">
                 <h2 className="text-3xl font-bold mb-8 text-emerald-400 text-center">Medical Safety First</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
@@ -227,7 +246,7 @@ const LandingPage = () => {
                       </li>
                     </ul>
                   </div>
-                  <div className="text-left p-6 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                  <div className="text-left p-6 bg-slate-800/50 rounded-xl border border-slate-700/50" >
                     <h3 className="text-xl font-semibold mb-4 text-emerald-300">Emergency Support</h3>
                     <ul className="space-y-3 text-slate-300">
                       <li className="flex items-center">
@@ -238,7 +257,7 @@ const LandingPage = () => {
                         <Shield className="w-5 h-5 mr-2 text-emerald-400" />
                         Emergency contact system
                       </li>
-                      <li className="flex items-center">
+                      <li className="flex items-center" ref={bottomRef}>
                         <Shield className="w-5 h-5 mr-2 text-emerald-400" />
                         Medical history access
                       </li>
@@ -248,16 +267,18 @@ const LandingPage = () => {
               </div>
             </section>
 
-            <div className="container mx-auto px-4">
-              <MedicalQuery />
-            </div>
           </main>
 
-          <div className="container mx-auto px-4 pb-16">
-            <ImageSlider />
+          <div >
+            <div className="container mx-auto px-10">
+              <MedicalQuery />
+            </div>
           </div>
-          
-          <Footer />
+
+            <div className="container mx-auto px-4 pb-16">
+              <ImageSlider />
+            </div>
+            <Footer />
         </div>
       )}
     </div>

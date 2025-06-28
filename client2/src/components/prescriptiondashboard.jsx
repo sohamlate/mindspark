@@ -20,12 +20,37 @@ const PrescriptionDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [llmTips, setLlmTips] = useState(null);
+const [activeCount, setActiveCount] = useState(0);
+const [passiveCount, setPassiveCount] = useState(0);
+
+  const [prescriptionStatuses, setPrescriptionStatuses] = useState({});
 
   useEffect(() => {
     fetchUser();
     fetchPrescriptions();
     fetchLLMTips();
+    fetchPrescriptionStatuses();
   }, [userId]);
+
+const fetchPrescriptionStatuses = async () => {
+  try {
+    const res = await axios.get(`http://localhost:3001/api/users/p/${userId}/prescriptionStatus`);
+    console.log("abcd", res);
+    const statusMap = {};
+    let active = 0, passive = 0;
+    res.data.statuses.forEach(item => {
+      statusMap[item._id] = item.isActive;
+      if (item.isActive) active += 1;
+      else passive += 1;
+    });
+    setPrescriptionStatuses(statusMap);
+    setActiveCount(active);
+    setPassiveCount(passive);
+  } catch (error) {
+    console.error("Error fetching prescription statuses", error);
+  }
+};
+
 
   const fetchUser = async () => {
     try {
@@ -47,7 +72,7 @@ const PrescriptionDashboard = () => {
       
       // // Combine all tips into a single string (optional: join with line breaks or bullets)
       // const combinedTips = allTips.join('\n\n');
-      console.log(res , "cdscds vd");
+      // console.log(res , "cdscds vd");
       
       setLlmTips(res.data.tips);
       console.log(res,"fds vdsf vds");
@@ -60,6 +85,7 @@ const PrescriptionDashboard = () => {
     try {
       const response = await axios.get(`http://localhost:3001/api/users/p/${userId}/prescriptions`);
       setPrescriptions(response.data);
+      
     } catch (error) {
       console.error('Error fetching prescriptions:', error);
     }
@@ -163,7 +189,7 @@ const PrescriptionDashboard = () => {
 
     try {
       setLoading(true);
-      await axios.put(`http://localhost:3001/api/users/${userId}/prescriptions/${_id}`, {
+      await axios.put(`http://localhost:3001/api/users/p/${_id}`, {
         title: editTitle,
       });
 
@@ -204,92 +230,167 @@ const PrescriptionDashboard = () => {
         transition={{ duration: 0.5 }}
       >
         <Link to="/dashboard" className="text-emerald-400 flex items-center mb-8 hover:text-emerald-300">
-          <ArrowLeft className="mr-2" /> Back to Users
+          <ArrowLeft className="mr-2" /> Back to Home
         </Link>
       </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="text-center mb-12"
-      >
-        <div className="flex justify-center items-center mb-6">
-          <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20 mr-4">
-            <User className="h-12 w-12 text-emerald-400" />
-          </div>
-          <h1 className="text-5xl font-bold text-transparent bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text">
-            {user.name}'s Prescriptions
-          </h1>
-        </div>
-        <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-          {llmTips || "No health tip available."}
-        </p>
-      </motion.div>
+     <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+      className="max-w-xl mx-auto mb-12 p-6 rounded-2xl border border-emerald-500/30 bg-emerald-400/5 backdrop-blur-md shadow-lg"
+    >
+      <h2 className="text-2xl font-bold text-slate-300 flex items-center justify-center mb-4">
+        💊 Health Tips for Your Medications
+      </h2>
+
+      {llmTips ? (
+        <div
+          className="
+            prose 
+            prose-invert 
+            prose-p:text-slate-200 
+            prose-li:text-slate-200 
+            prose-headings:text-emerald-400 
+            text-left 
+            text-lg 
+            leading-relaxed 
+            space-y-2
+            text-slate-300
+          "
+          dangerouslySetInnerHTML={{ __html: llmTips }}
+        />
+      ) : (
+        <p className="text-slate-300 text-center">No health tips available.</p>
+      )}
+    </motion.div>
+
+    <div className="flex justify-center gap-4 mb-12">
+  <button
+    className="
+      flex items-center gap-2 
+      bg-emerald-500/20 
+      hover:bg-emerald-500/30 
+      text-emerald-300 
+      font-semibold 
+      px-4 py-2 
+      rounded-lg 
+      border border-emerald-500/30 
+      transition
+    "
+  >
+    Active Prescriptions
+    <span className="bg-emerald-600 text-white rounded-full px-2 py-0.5 text-sm">{activeCount}</span>
+  </button>
+  <button
+    className="
+      flex items-center gap-2 
+      bg-slate-600/20 
+      hover:bg-slate-600/30 
+      text-slate-300 
+      font-semibold 
+      px-4 py-2 
+      rounded-lg 
+      border border-slate-500/30 
+      transition
+    "
+  >
+    Passive Prescriptions
+    <span className="bg-slate-500 text-white rounded-full px-2 py-0.5 text-sm">{passiveCount}</span>
+  </button>
+</div>
+
+
 
       {/* Prescriptions Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {prescriptions.map((prescription, index) => (
-          <motion.div
-            key={prescription._id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="bg-slate-800/50 rounded-xl border border-slate-700/50 hover:border-emerald-500/50 hover:scale-105 transition-all duration-300 shadow-lg"
-          >
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                {editMode === prescription._id ? (
-                  <input
-                    type="text"
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-2/3 px-4 py-2 text-emerald-400 bg-slate-900/50 border border-slate-700/50 rounded-lg focus:ring-emerald-500 focus:outline-none"
-                  />
-                ) : (
-                  <h2 className="text-xl font-semibold text-emerald-400">{prescription.title}</h2>
-                )}
-                <div className="flex space-x-2">
-                  {editMode === prescription._id ? (
-                    <motion.button
-                      onClick={(e) => handleSaveEdit(e, prescription._id)}
-                      className="p-2 bg-emerald-500/20 rounded-full hover:bg-emerald-500/30 text-emerald-400"
-                    >
-                      <Save className="h-5 w-5" />
-                    </motion.button>
-                  ) : (
-                    <motion.button
-                      onClick={(e) => handleEdit(e, prescription._id, prescription.title)}
-                      className="p-2 bg-emerald-500/20 rounded-full hover:bg-emerald-500/30 text-emerald-400"
-                    >
-                      <Pencil className="h-5 w-5" />
-                    </motion.button>
-                  )}
-                  <motion.button
-                    onClick={(e) => handleDelete(e, prescription._id)}
-                    className="p-2 bg-red-500/20 rounded-full hover:bg-red-500/30 text-red-400"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </motion.button>
-                </div>
-              </div>
-              <Link to={`/${userId}/prescriptions/${prescription._id}`}>
-                <img src={prescription.imageUrl} alt={prescription.title} className="w-full h-48 object-cover rounded-lg" />
-              </Link>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+      {/* Prescriptions Grid */}
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+  {prescriptions
+  .slice()
+  .sort((a, b) => {
+    const aActive = prescriptionStatuses[a._id] ? 1 : 0;
+    const bActive = prescriptionStatuses[b._id] ? 1 : 0;
+    return bActive - aActive; // active (1) first
+  }).map((prescription, index) => {
+    const isActive = prescriptionStatuses[prescription._id];
 
-      {/* Floating Add Button */}
-      <div className="fixed bottom-8 right-8">
-        <motion.button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-emerald-500 text-white rounded-full p-4 shadow-lg hover:bg-emerald-600 transition"
-        >
-          {showAddForm ? <X className="h-8 w-8" /> : <PlusCircle className="h-8 w-8" />}
-        </motion.button>
-      </div>
+    return (
+      <motion.div
+        key={prescription._id}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: index * 0.05 }}
+        className={`
+        rounded-xl
+        hover:scale-105
+        transition-all duration-300
+        shadow-lg
+        ${isActive 
+          ? 'bg-slate-800 border  border-emerald-500/50 hover:border-emerald-400' 
+          : 'bg-slate-700 border border-slate-600/50 hover:border-slate-500'}
+      `}
+
+      >
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            {editMode === prescription._id ? (
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="w-2/3 px-4 py-2 text-emerald-400 bg-slate-900/50 border border-slate-700/50 rounded-lg focus:ring-emerald-500 focus:outline-none"
+              />
+            ) : (
+              <h2 className="text-xl font-semibold text-emerald-400">{prescription.title}</h2>
+            )}
+            <div className="flex space-x-2">
+              {editMode === prescription._id ? (
+                <motion.button
+                  onClick={(e) => handleSaveEdit(e, prescription._id)}
+                  className="p-2 bg-emerald-500/20 rounded-full hover:bg-emerald-500/30 text-emerald-400"
+                >
+                  <Save className="h-5 w-5" />
+                </motion.button>
+              ) : (
+                <motion.button
+                  onClick={(e) => handleEdit(e, prescription._id, prescription.title)}
+                  className="p-2 bg-emerald-500/20 rounded-full hover:bg-emerald-500/30 text-emerald-400"
+                >
+                  <Pencil className="h-5 w-5" />
+                </motion.button>
+              )}
+              <motion.button
+                onClick={(e) => handleDelete(e, prescription._id)}
+                className="p-2 bg-red-500/20 rounded-full hover:bg-red-500/30 text-red-400"
+              >
+                <Trash2 className="h-5 w-5" />
+              </motion.button>
+            </div>
+          </div>
+          <Link to={`/${userId}/prescriptions/${prescription._id}`}>
+            <img
+              src={prescription.imageUrl}
+              alt={prescription.title}
+              className="w-full h-48 object-cover rounded-lg"
+            />
+          </Link>
+        </div>
+      </motion.div>
+    );
+  })}
+</div>
+
+
+   {/* Floating Add Button */}
+    <div className="fixed bottom-8 right-8 z-50">
+      <motion.button
+        onClick={() => setShowAddForm(!showAddForm)}
+        className="bg-emerald-500 text-white rounded-full p-4 shadow-lg hover:bg-emerald-600 transition"
+      >
+        {showAddForm ? <X className="h-8 w-8" /> : <PlusCircle className="h-8 w-8" />}
+      </motion.button>
+    </div>
+
 
       {/* Add Form */}
       {showAddForm && (
