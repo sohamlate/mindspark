@@ -35,7 +35,7 @@ app.use('/api/user-tips', userTipsRoute);
 app.use('/api/dashboard', dashboardRoutes);
 
 app.use('/api/users', rootuser);
-app.use('/api/users', priscriptionRoutes);
+// app.use('/api/users', priscriptionRoutes);
 app.use('/api/rootuser', authRoutes);
 app.use('/api/users/p', priscriptionRoutes);
 app.use('/api/extractimg', llmRoutes);

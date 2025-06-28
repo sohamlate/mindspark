@@ -163,7 +163,7 @@ const PrescriptionDashboard = () => {
 
     try {
       setLoading(true);
-      await axios.put(`http://localhost:3001/api/users/${userId}/prescriptions/${_id}`, {
+      await axios.put(`http://localhost:3001/api/users/p/${_id}`, {
         title: editTitle,
       });
 
