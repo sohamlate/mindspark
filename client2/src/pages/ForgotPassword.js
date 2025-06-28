@@ -9,7 +9,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     setMessage('');
     try {
-      const res = await axios.post('http://localhost:3001/api/rootuser/forgot-password', { gmail });
+      const res = await axios.post('https://prescriptprob.vercel.app/api/rootuser/forgot-password', { gmail });
       setMessage(res.data.message);
     } catch (error) {
       setMessage('Something went wrong. Try again.');

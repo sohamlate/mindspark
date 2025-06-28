@@ -18,7 +18,7 @@ const MedicationForm = ({ onMedicationAdded }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:3001/medications', {
+            const response = await fetch('https://prescriptprob.vercel.app/medications', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

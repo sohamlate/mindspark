@@ -37,7 +37,7 @@ const UserDashboard = ({ user }) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/api/users', {
+      const response = await axios.post('https://prescriptprob.vercel.app/api/users', {
         rootUserId,
       });
       const usersArray = Array.isArray(response.data.users)
@@ -51,7 +51,7 @@ const UserDashboard = ({ user }) => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/api/dashboard/stats', {
+      const response = await axios.post('https://prescriptprob.vercel.app/api/dashboard/stats', {
         rootUserId,
       });
       setDashboardStats(response.data);
@@ -77,9 +77,9 @@ const UserDashboard = ({ user }) => {
       };
 
       if (editingUser) {
-        await axios.put(`http://localhost:3001/api/users/${editingUser._id}`, formattedUser);
+        await axios.put(`https://prescriptprob.vercel.app/api/users/${editingUser._id}`, formattedUser);
       } else {
-        await axios.post('http://localhost:3001/api/users/create', {
+        await axios.post('https://prescriptprob.vercel.app/api/users/create', {
           ...formattedUser,
           rootUserId,
         });
@@ -116,7 +116,7 @@ const UserDashboard = ({ user }) => {
   const handleDelete = async (userId, e) => {
     e.stopPropagation();
     try {
-      await axios.delete(`http://localhost:3001/api/users/${userId}`);
+      await axios.delete(`https://prescriptprob.vercel.app/api/users/${userId}`);
       fetchUsers();
     } catch (error) {
       console.error('Error deleting user:', error);

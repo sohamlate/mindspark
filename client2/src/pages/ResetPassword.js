@@ -11,7 +11,7 @@ const ResetPassword = () => {
   const handleReset = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:3001/api/rootuser/reset-password', {
+      const res = await axios.post('https://prescriptprob.vercel.app/api/rootuser/reset-password', {
         token,
         newPassword
       });

@@ -34,7 +34,7 @@ const [passiveCount, setPassiveCount] = useState(0);
 
 const fetchPrescriptionStatuses = async () => {
   try {
-    const res = await axios.get(`http://localhost:3001/api/users/p/${userId}/prescriptionStatus`);
+    const res = await axios.get(`https://prescriptprob.vercel.app/api/users/p/${userId}/prescriptionStatus`);
     console.log("abcd", res);
     const statusMap = {};
     let active = 0, passive = 0;
@@ -54,7 +54,7 @@ const fetchPrescriptionStatuses = async () => {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/api/users/getUser', { userId });
+      const response = await axios.post('https://prescriptprob.vercel.app/api/users/getUser', { userId });
       setUser({ name: response.data.users.name, imageUrl: response.data.users.imageUrl });
     } catch (error) {
       setError('Error fetching user');
@@ -66,7 +66,7 @@ const fetchPrescriptionStatuses = async () => {
 
   const fetchLLMTips = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/user-tips/${userId}`);
+      const res = await axios.get(`https://prescriptprob.vercel.app/api/user-tips/${userId}`);
        // Extract all `kwargs.content` strings from the response
       // const allTips = res.data.tips.map(item => item.tips.kwargs.content);
       
@@ -83,7 +83,7 @@ const fetchPrescriptionStatuses = async () => {
 
   const fetchPrescriptions = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/users/p/${userId}/prescriptions`);
+      const response = await axios.get(`https://prescriptprob.vercel.app/api/users/p/${userId}/prescriptions`);
       setPrescriptions(response.data);
       
     } catch (error) {
@@ -123,12 +123,12 @@ const fetchPrescriptionStatuses = async () => {
         async () => {
           try {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            const medications = await axios.post('http://localhost:3001/api/extractimg/fetchimage', {
+            const medications = await axios.post('https://prescriptprob.vercel.app/api/extractimg/fetchimage', {
               imageUrl: downloadURL,
             });
 
             const response = await axios.post(
-              `http://localhost:3001/api/users/p/${userId}/newPrescription`,
+              `https://prescriptprob.vercel.app/api/users/p/${userId}/newPrescription`,
               {
                 title: newPrescription.title,
                 imageUrl: downloadURL,
@@ -161,7 +161,7 @@ const fetchPrescriptionStatuses = async () => {
     if (window.confirm('Are you sure you want to delete this prescription?')) {
       try {
         setLoading(true);
-        await axios.delete(`http://localhost:3001/api/users/${userId}/prescriptions/${_id}`);
+        await axios.delete(`https://prescriptprob.vercel.app/api/users/${userId}/prescriptions/${_id}`);
         setPrescriptions((prev) => prev.filter((p) => p._id !== _id));
       } catch (error) {
         console.error('Error deleting prescription:', error);
@@ -189,7 +189,7 @@ const fetchPrescriptionStatuses = async () => {
 
     try {
       setLoading(true);
-      await axios.put(`http://localhost:3001/api/users/p/${_id}`, {
+      await axios.put(`https://prescriptprob.vercel.app/api/users/p/${_id}`, {
         title: editTitle,
       });
 

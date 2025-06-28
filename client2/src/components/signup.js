@@ -15,7 +15,7 @@ const Signup = () => {
   const handleRequestOtp = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:3001/api/rootuser/request-otp', {
+      const res = await axios.post('https://prescriptprob.vercel.app/api/rootuser/request-otp', {
         gmail,
         phone,
       });
@@ -29,7 +29,7 @@ const Signup = () => {
   const handleVerifyAndSignup = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3001/api/rootuser/verify-otp', {
+      await axios.post('https://prescriptprob.vercel.app/api/rootuser/verify-otp', {
         gmail,
         phone,
         password,
