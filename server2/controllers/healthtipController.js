@@ -11,9 +11,10 @@ const model = new ChatGroq({
 });
 
 const promptTemplate = ChatPromptTemplate.fromMessages([
-  ["system", "You are a helpful medical assistant. Give 2 short, numbered health tips for an Indian adult taking the given medicine. Do not start with greetings or introductions. Be concise and clear."],
-  ["human", "{medicineList}"]
+  ["system", "You are a helpful medical assistant. Return 2 short, numbered health tips for an Indian adult taking the given medicine, formatted in simple HTML using <ul> and <li>, and include a relevant emoji at the beginning of each tip to make it engaging (like 💧 for hydration, 🕒 for timing, 🍽️ for food-related, etc.). Do not include greetings or introductions. Be concise and clear."],
+
 ]);
+
 
 exports.getUserHealthTips = async (req, res) => {
   try {
